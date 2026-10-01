@@ -10,6 +10,10 @@ import { renderBottomNav } from './components/layout/BottomNav';
 import { initRouter } from './app/router';
 import { store } from './app/store';
 
+// Vercel Web Analytics
+import { inject } from '@vercel/analytics';
+inject();
+
 // PWA Service Worker Registration
 import { registerSW } from 'virtual:pwa-register';
 
