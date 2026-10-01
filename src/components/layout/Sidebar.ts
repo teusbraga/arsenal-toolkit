@@ -74,6 +74,20 @@ export function renderSidebar(container: HTMLElement): void {
           <span>Financeiro</span>
         </a>
 
+        <a href="#/categoria/text" class="nav-item ${currentRoute.includes('text') || currentRoute.includes('texto') ? 'active' : ''}" data-route="#/categoria/text">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
+          </svg>
+          <span>Texto</span>
+        </a>
+
+        <a href="#/categoria/devtools" class="nav-item ${currentRoute.includes('dev') ? 'active' : ''}" data-route="#/categoria/devtools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+          <span>Dev Tools</span>
+        </a>
+
         <a href="#/favoritos" class="nav-item ${currentRoute === '#/favoritos' ? 'active' : ''}" data-route="#/favoritos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>

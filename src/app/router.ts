@@ -21,6 +21,8 @@ import { renderCompoundInterest } from '../features/financial/compoundInterest.v
 import { renderFinancingCalculator } from '../features/financial/financing.view';
 import { renderCashVsInstallment } from '../features/financial/cashVsInstallment.view';
 import { renderBillSplit } from '../features/financial/billSplit.view';
+import { renderTextView } from '../features/text/text.view';
+import { renderDevTools } from '../features/devtools/devtools.view';
 import { renderCategoryView } from '../features/categories/category.view';
 import { TOOLS_LIST } from './toolsRegistry';
 
@@ -76,6 +78,10 @@ export function initRouter(appContainer: HTMLElement): void {
       renderCashVsInstallment(appContainer);
     } else if (hash === '#/divisao-conta') {
       renderBillSplit(appContainer);
+    } else if (hash === '#/texto') {
+      renderTextView(appContainer);
+    } else if (hash === '#/dev-tools') {
+      renderDevTools(appContainer);
     } else if (hash.startsWith('#/categoria/')) {
       const catId = hash.replace('#/categoria/', '');
       renderCategoryView(appContainer, catId);

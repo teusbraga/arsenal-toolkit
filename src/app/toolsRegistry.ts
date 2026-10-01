@@ -50,6 +50,20 @@ export const CATEGORIES_LIST = [
     desc: 'Juros compostos, financiamentos SAC/Price e margem.',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
     path: '#/categoria/financial'
+  },
+  {
+    id: 'text',
+    name: 'Texto & Produtividade',
+    desc: 'Contador de caracteres, case converter, diff e slug.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>`,
+    path: '#/categoria/text'
+  },
+  {
+    id: 'devtools',
+    name: 'Developer Tools',
+    desc: 'JSON Formatter, Base64, Hashes, UUID, JWT e Regex.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+    path: '#/categoria/devtools'
   }
 ];
 
@@ -249,5 +263,23 @@ export const TOOLS_LIST: ToolItem[] = [
     description: 'Divisão rápida de bar, restaurante e taxa de serviço.',
     path: '#/divisao-conta',
     featured: false,
+  },
+  {
+    id: 'text-tools',
+    name: 'Manipulação de Texto',
+    category: 'text',
+    categoryName: 'Texto & Produtividade',
+    description: 'Contador de palavras, maiúsculas/minúsculas, diff e slug.',
+    path: '#/texto',
+    featured: true,
+  },
+  {
+    id: 'dev-tools',
+    name: 'Developer Tools',
+    category: 'devtools',
+    categoryName: 'Developer Tools',
+    description: 'JSON Formatter, Base64, Hashes, UUID, JWT e Regex.',
+    path: '#/dev-tools',
+    featured: true,
   }
 ];
