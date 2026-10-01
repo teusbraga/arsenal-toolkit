@@ -306,6 +306,15 @@ export const TOOLS_LIST: ToolItem[] = [
     path: '#/pdf/para-texto',
     featured: true,
   },
+  {
+    id: 'pdf-to-excel',
+    name: 'PDF para Tabela / Excel (CSV)',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Extraia tabelas, faturas e relatórios tabulares de PDFs para abrir no Excel ou Mini Excel.',
+    path: '#/pdf/para-excel',
+    featured: true,
+  },
 
   // Imagens
   {

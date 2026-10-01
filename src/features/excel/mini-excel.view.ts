@@ -8,12 +8,22 @@ export function renderMiniExcel(container: HTMLElement) {
   let selectedCellId: string = 'A1';
   let isEditing = false;
 
-  // Load default template
   const templates = ExcelService.getTemplates();
-  const defaultTpl = templates.financial;
-  numCols = defaultTpl.cols;
-  numRows = defaultTpl.rows;
-  grid = JSON.parse(JSON.stringify(defaultTpl.data));
+
+  // Load imported CSV if coming from PDF-to-Excel or load default template
+  const pendingCsv = sessionStorage.getItem('mini_excel_import_csv');
+  if (pendingCsv) {
+    sessionStorage.removeItem('mini_excel_import_csv');
+    const parsed = ExcelService.parseCsv(pendingCsv);
+    numCols = parsed.maxCols;
+    numRows = parsed.maxRows;
+    grid = parsed.grid;
+  } else {
+    const defaultTpl = templates.financial;
+    numCols = defaultTpl.cols;
+    numRows = defaultTpl.rows;
+    grid = JSON.parse(JSON.stringify(defaultTpl.data));
+  }
 
   container.innerHTML = `
     <div class="tool-view-header">

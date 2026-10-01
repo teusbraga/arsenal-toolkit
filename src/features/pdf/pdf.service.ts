@@ -613,6 +613,144 @@ export class PdfService {
       wordCount
     };
   }
+
+  /**
+   * Extracts tabular data from PDF pages and returns CSV and 2D table array.
+   */
+  static async extractTablesToCsv(
+    arrayBuffer: ArrayBuffer,
+    options?: { delimiter?: string; pageNum?: number }
+  ): Promise<{
+    csv: string;
+    tableData: string[][];
+    pageCount: number;
+    rowCount: number;
+    colCount: number;
+  }> {
+    const delimiter = options?.delimiter || ';';
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+    const pdf = await loadingTask.promise;
+    const pageCount = pdf.numPages;
+
+    const startPage = options?.pageNum ? options.pageNum : 1;
+    const endPage = options?.pageNum ? options.pageNum : pageCount;
+
+    const allRows: string[][] = [];
+
+    for (let p = startPage; p <= endPage; p++) {
+      const page = await pdf.getPage(p);
+      const textContent = await page.getTextContent();
+
+      interface TextItem {
+        str: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }
+
+      const items: TextItem[] = [];
+      for (const item of textContent.items as any[]) {
+        if (!item.str || item.str.trim() === '') continue;
+        items.push({
+          str: item.str,
+          x: item.transform[4],
+          y: item.transform[5],
+          width: item.width || (item.str.length * 6),
+          height: item.height || 12
+        });
+      }
+
+      // Sort by Y descending (top to bottom), then X ascending (left to right)
+      items.sort((a, b) => {
+        if (Math.abs(a.y - b.y) <= 4) {
+          return a.x - b.x;
+        }
+        return b.y - a.y;
+      });
+
+      // Group into rows
+      const rows: TextItem[][] = [];
+      let currentRow: TextItem[] = [];
+      let currentY: number | null = null;
+
+      for (const item of items) {
+        if (currentY === null || Math.abs(item.y - currentY) <= 4) {
+          currentRow.push(item);
+          currentY = item.y;
+        } else {
+          if (currentRow.length > 0) {
+            rows.push(currentRow);
+          }
+          currentRow = [item];
+          currentY = item.y;
+        }
+      }
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+
+      // Group consecutive items into cells if gap is small, or separate cells if gap is large
+      for (const rowItems of rows) {
+        rowItems.sort((a, b) => a.x - b.x);
+        const cells: string[] = [];
+        let currentCell = '';
+        let lastEnd = -1;
+
+        for (const it of rowItems) {
+          const gap = lastEnd === -1 ? 0 : it.x - lastEnd;
+          if (lastEnd !== -1 && gap > 18) {
+            cells.push(currentCell.trim());
+            currentCell = it.str;
+          } else {
+            currentCell = currentCell ? currentCell + ' ' + it.str : it.str;
+          }
+          lastEnd = it.x + it.width;
+        }
+        if (currentCell) {
+          cells.push(currentCell.trim());
+        }
+
+        if (cells.length > 0 && cells.some(c => c !== '')) {
+          allRows.push(cells);
+        }
+      }
+    }
+
+    // Determine max columns
+    let colCount = 0;
+    for (const r of allRows) {
+      if (r.length > colCount) colCount = r.length;
+    }
+
+    // Normalize rows to have colCount length
+    for (const r of allRows) {
+      while (r.length < colCount) {
+        r.push('');
+      }
+    }
+
+    // Generate CSV string
+    const csvLines = allRows.map(row => {
+      return row.map(cell => {
+        let val = cell || '';
+        if (val.includes(delimiter) || val.includes('"') || val.includes('\n')) {
+          val = `"${val.replace(/"/g, '""')}"`;
+        }
+        return val;
+      }).join(delimiter);
+    });
+
+    const csv = csvLines.join('\r\n');
+
+    return {
+      csv,
+      tableData: allRows,
+      pageCount,
+      rowCount: allRows.length,
+      colCount
+    };
+  }
 }
 
 export type PdfEditItem = 
