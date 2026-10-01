@@ -482,6 +482,137 @@ export class PdfService {
 
     return await pdf.save();
   }
+
+  /**
+   * Extracts clean structured text and formatted Markdown from a PDF document.
+   */
+  static async extractTextAndMarkdown(arrayBuffer: ArrayBuffer): Promise<{
+    text: string;
+    markdown: string;
+    pageCount: number;
+    charCount: number;
+    wordCount: number;
+  }> {
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+    const pdf = await loadingTask.promise;
+    const pageCount = pdf.numPages;
+
+    const allPagesText: string[] = [];
+    const allPagesMd: string[] = [];
+    const allFontSizes: number[] = [];
+
+    interface TextItemWithPos {
+      str: string;
+      x: number;
+      y: number;
+      fontSize: number;
+      width: number;
+      height: number;
+    }
+
+    const pagesData: TextItemWithPos[][] = [];
+
+    for (let p = 1; p <= pageCount; p++) {
+      const page = await pdf.getPage(p);
+      const textContent = await page.getTextContent();
+      const items: TextItemWithPos[] = [];
+
+      for (const item of textContent.items as any[]) {
+        if (!item.str || item.str.trim() === '') continue;
+        const tx = item.transform[4];
+        const ty = item.transform[5];
+        const fontSize = Math.abs(item.transform[0]) || Math.abs(item.transform[3]) || 12;
+        items.push({
+          str: item.str,
+          x: tx,
+          y: ty,
+          fontSize,
+          width: item.width || 0,
+          height: item.height || 0
+        });
+        allFontSizes.push(fontSize);
+      }
+
+      // Sort top-to-bottom (Y descending), then left-to-right (X ascending)
+      items.sort((a, b) => {
+        if (Math.abs(a.y - b.y) <= 3) {
+          return a.x - b.x;
+        }
+        return b.y - a.y;
+      });
+
+      pagesData.push(items);
+    }
+
+    // Determine baseline body font size (median)
+    allFontSizes.sort((a, b) => a - b);
+    const bodyFontSize = allFontSizes.length > 0 ? allFontSizes[Math.floor(allFontSizes.length / 2)] : 12;
+
+    for (let p = 0; p < pagesData.length; p++) {
+      const items = pagesData[p];
+      const pageLines: Array<{ lineStr: string; fontSize: number }> = [];
+
+      let currentLineItems: TextItemWithPos[] = [];
+      let currentY: number | null = null;
+
+      for (const item of items) {
+        if (currentY === null || Math.abs(item.y - currentY) <= 3) {
+          currentLineItems.push(item);
+          currentY = item.y;
+        } else {
+          if (currentLineItems.length > 0) {
+            const lineStr = currentLineItems.map(i => i.str).join(' ');
+            const avgSize = currentLineItems.reduce((acc, i) => acc + i.fontSize, 0) / currentLineItems.length;
+            pageLines.push({ lineStr: lineStr.trim(), fontSize: avgSize });
+          }
+          currentLineItems = [item];
+          currentY = item.y;
+        }
+      }
+      if (currentLineItems.length > 0) {
+        const lineStr = currentLineItems.map(i => i.str).join(' ');
+        const avgSize = currentLineItems.reduce((acc, i) => acc + i.fontSize, 0) / currentLineItems.length;
+        pageLines.push({ lineStr: lineStr.trim(), fontSize: avgSize });
+      }
+
+      // Format page as Plain Text
+      const rawText = pageLines.map(l => l.lineStr).join('\n');
+      allPagesText.push(rawText);
+
+      // Format page as Markdown
+      const mdLines: string[] = [];
+      for (const l of pageLines) {
+        const text = l.lineStr;
+        if (!text) continue;
+
+        if (l.fontSize >= bodyFontSize * 1.5) {
+          mdLines.push(`\n# ${text}\n`);
+        } else if (l.fontSize >= bodyFontSize * 1.25) {
+          mdLines.push(`\n## ${text}\n`);
+        } else if (l.fontSize >= bodyFontSize * 1.1) {
+          mdLines.push(`\n### ${text}\n`);
+        } else {
+          mdLines.push(text);
+        }
+      }
+
+      allPagesMd.push(`<!-- Página ${p + 1} -->\n` + mdLines.join('\n'));
+    }
+
+    const fullText = allPagesText.join('\n\n--- Página ---\n\n');
+    const fullMd = allPagesMd.join('\n\n---\n\n');
+
+    const charCount = fullText.length;
+    const wordCount = fullText.trim() ? fullText.trim().split(/\s+/).length : 0;
+
+    return {
+      text: fullText,
+      markdown: fullMd,
+      pageCount,
+      charCount,
+      wordCount
+    };
+  }
 }
 
 export type PdfEditItem = 

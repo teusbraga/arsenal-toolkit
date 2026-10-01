@@ -15,6 +15,7 @@ import { renderImageToPdf } from '../features/pdf/image-to-pdf.view';
 import { renderPdfMetadata } from '../features/pdf/pdf-metadata.view';
 import { renderPdfCompress } from '../features/pdf/pdf-compress.view';
 import { renderPdfEdit } from '../features/pdf/pdf-edit.view';
+import { renderPdfToText } from '../features/pdf/pdf-to-text.view';
 import { renderImageCompress } from '../features/image/image-compress.view';
 import { renderImageConvert } from '../features/image/image-convert.view';
 import { renderImageResize } from '../features/image/image-resize.view';
@@ -83,6 +84,8 @@ export function initRouter(appContainer: HTMLElement): void {
       renderPdfCompress(appContainer);
     } else if (hash === '#/pdf/editor') {
       renderPdfEdit(appContainer);
+    } else if (hash === '#/pdf/para-texto') {
+      renderPdfToText(appContainer);
     } else if (hash === '#/imagem/comprimir') {
       renderImageCompress(appContainer);
     } else if (hash === '#/imagem/converter') {

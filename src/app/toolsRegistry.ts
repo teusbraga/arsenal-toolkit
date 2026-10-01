@@ -297,6 +297,15 @@ export const TOOLS_LIST: ToolItem[] = [
     path: '#/pdf/editor',
     featured: true,
   },
+  {
+    id: 'pdf-to-text',
+    name: 'PDF para Markdown & Texto',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Extraia todo o texto de contratos e artigos em Markdown estruturado ou texto limpo para IA.',
+    path: '#/pdf/para-texto',
+    featured: true,
+  },
 
   // Imagens
   {
