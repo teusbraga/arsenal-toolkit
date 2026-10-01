@@ -3,6 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import { PDFDocument, degrees, StandardFonts, rgb } from 'pdf-lib';
 import JSZip from 'jszip';
+import { encryptPDF, EncryptPDFOptions } from '@pdfsmaller/pdf-encrypt';
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -860,6 +861,49 @@ export class PdfService {
       method: 'raster',
       numPages
     };
+  }
+
+  /**
+   * Encrypts and password-protects a PDF document using AES-256 or RC4.
+   */
+  static async lockPdf(
+    pdfBuffer: ArrayBuffer | Uint8Array,
+    userPassword: string,
+    options?: {
+      ownerPassword?: string;
+      algorithm?: 'AES-256' | 'RC4';
+      allowPrinting?: boolean;
+      allowCopying?: boolean;
+      allowModifying?: boolean;
+      allowAnnotating?: boolean;
+    }
+  ): Promise<Uint8Array> {
+    const bytes = pdfBuffer instanceof Uint8Array ? pdfBuffer : new Uint8Array(pdfBuffer);
+
+    // Try to ensure the PDF is unencrypted before encrypting it
+    let inputBytes = bytes;
+    try {
+      const pdfDoc = await PDFDocument.load(bytes);
+      inputBytes = await pdfDoc.save();
+    } catch {
+      try {
+        const cleanedDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        inputBytes = await cleanedDoc.save();
+      } catch {
+        // Fall back to original bytes
+      }
+    }
+
+    const encryptOptions: EncryptPDFOptions = {
+      algorithm: options?.algorithm || 'AES-256',
+      ownerPassword: options?.ownerPassword || undefined,
+      allowPrinting: options?.allowPrinting ?? true,
+      allowCopying: options?.allowCopying ?? true,
+      allowModifying: options?.allowModifying ?? false,
+      allowAnnotating: options?.allowAnnotating ?? true,
+    };
+
+    return await encryptPDF(inputBytes, userPassword, encryptOptions);
   }
 }
 

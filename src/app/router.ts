@@ -18,6 +18,7 @@ import { renderPdfEdit } from '../features/pdf/pdf-edit.view';
 import { renderPdfToText } from '../features/pdf/pdf-to-text.view';
 import { renderPdfToExcel } from '../features/pdf/pdf-to-excel.view';
 import { renderPdfUnlock } from '../features/pdf/pdf-unlock.view';
+import { renderPdfLock } from '../features/pdf/pdf-lock.view';
 import { renderImageCompress } from '../features/image/image-compress.view';
 import { renderImageConvert } from '../features/image/image-convert.view';
 import { renderImageResize } from '../features/image/image-resize.view';
@@ -92,6 +93,8 @@ export function initRouter(appContainer: HTMLElement): void {
       renderPdfToExcel(appContainer);
     } else if (hash === '#/pdf/desbloquear') {
       renderPdfUnlock(appContainer);
+    } else if (hash === '#/pdf/bloquear') {
+      renderPdfLock(appContainer);
     } else if (hash === '#/imagem/comprimir') {
       renderImageCompress(appContainer);
     } else if (hash === '#/imagem/converter') {

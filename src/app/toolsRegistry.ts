@@ -324,6 +324,15 @@ export const TOOLS_LIST: ToolItem[] = [
     path: '#/pdf/desbloquear',
     featured: true,
   },
+  {
+    id: 'pdf-lock',
+    name: 'Bloquear PDF (Proteger com Senha)',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Proteja seus documentos PDF com criptografia militar AES-256 e restrinja cópia ou impressão.',
+    path: '#/pdf/bloquear',
+    featured: true,
+  },
 
   // Imagens
   {
