@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+﻿import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
@@ -7,11 +7,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
-        name: 'Backpack Tools',
-        short_name: 'BackpackTools',
-        description: 'Suíte completa de ferramentas essenciais para produtividade diária.',
-        theme_color: '#0f172a',
-        background_color: '#f8fafc',
+        name: 'Arsenal PDF converter',
+        short_name: 'Arsenal PDF',
+        description: 'SuÃ­te completa de ferramentas essenciais para produtividade diÃ¡ria.',
+        theme_color: '#111111',
+        background_color: '#F5F5F5',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',
@@ -53,3 +53,4 @@ export default defineConfig({
     })
   ]
 });
+
