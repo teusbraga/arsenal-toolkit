@@ -333,6 +333,15 @@ export const TOOLS_LIST: ToolItem[] = [
     path: '#/pdf/bloquear',
     featured: true,
   },
+  {
+    id: 'pdf-compare',
+    name: 'Comparar PDFs',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Compare dois documentos PDF lado a lado, com sobreposição visual de diferenças e diff de texto.',
+    path: '#/pdf/comparar',
+    featured: true,
+  },
 
   // Imagens
   {
