@@ -315,6 +315,15 @@ export const TOOLS_LIST: ToolItem[] = [
     path: '#/pdf/para-excel',
     featured: true,
   },
+  {
+    id: 'pdf-unlock',
+    name: 'Desbloquear PDF',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Remova senhas e restrições de impressão, cópia e edição de documentos PDF.',
+    path: '#/pdf/desbloquear',
+    featured: true,
+  },
 
   // Imagens
   {

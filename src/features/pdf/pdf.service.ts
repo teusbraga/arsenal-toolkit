@@ -751,6 +751,116 @@ export class PdfService {
       colCount
     };
   }
+
+  /**
+   * Checks if a PDF is encrypted or protected by password/permissions.
+   */
+  static async checkPdfEncryption(arrayBuffer: ArrayBuffer): Promise<{
+    isEncrypted: boolean;
+    needsPassword: boolean;
+  }> {
+    try {
+      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+      await loadingTask.promise;
+
+      // Check if pdf-lib considers it encrypted
+      try {
+        await PDFDocument.load(arrayBuffer);
+        return { isEncrypted: false, needsPassword: false };
+      } catch (err: any) {
+        if (err.name === 'EncryptedPDFError' || err.message?.toLowerCase().includes('encrypted')) {
+          return { isEncrypted: true, needsPassword: false };
+        }
+      }
+      return { isEncrypted: false, needsPassword: false };
+    } catch (err: any) {
+      if (err.name === 'PasswordException' || err.code === 1 || err.code === 2) {
+        return { isEncrypted: true, needsPassword: true };
+      }
+      return { isEncrypted: false, needsPassword: false };
+    }
+  }
+
+  /**
+   * Decrypts and permanently strips passwords and restrictions from a PDF.
+   */
+  static async unlockPdf(
+    arrayBuffer: ArrayBuffer,
+    password?: string,
+    onProgress?: (current: number, total: number) => void
+  ): Promise<{ unlockedBuffer: Uint8Array; method: 'direct' | 'raster'; numPages: number }> {
+    // Attempt 1: Direct bypass via pdf-lib ignoreEncryption (works for owner/permission passwords)
+    if (!password) {
+      try {
+        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const savedBytes = await pdfDoc.save();
+        const testDoc = await PDFDocument.load(savedBytes);
+        return {
+          unlockedBuffer: savedBytes,
+          method: 'direct',
+          numPages: testDoc.getPageCount()
+        };
+      } catch {
+        // Requires password
+      }
+    }
+
+    // Attempt 2: Decrypt via pdfjs-dist with password and re-encode
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(arrayBuffer),
+      password: password || ''
+    });
+
+    const pdf = await loadingTask.promise;
+    const numPages = pdf.numPages;
+
+    const newPdf = await PDFDocument.create();
+
+    for (let p = 1; p <= numPages; p++) {
+      if (onProgress) onProgress(p, numPages);
+      const page = await pdf.getPage(p);
+      const viewport = page.getViewport({ scale: 2.0 }); // 2x sharp high resolution
+
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) throw new Error('Não foi possível inicializar o Canvas 2D.');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      await page.render({ canvasContext: ctx, viewport } as any).promise;
+
+      const imgDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      const imgBase64 = imgDataUrl.split(',')[1];
+      const binaryImg = atob(imgBase64);
+      const imgBytes = new Uint8Array(binaryImg.length);
+      for (let i = 0; i < binaryImg.length; i++) {
+        imgBytes[i] = binaryImg.charCodeAt(i);
+      }
+
+      const embeddedJpg = await newPdf.embedJpg(imgBytes);
+      const originalVp = page.getViewport({ scale: 1.0 });
+      const newPage = newPdf.addPage([originalVp.width, originalVp.height]);
+      newPage.drawImage(embeddedJpg, {
+        x: 0,
+        y: 0,
+        width: originalVp.width,
+        height: originalVp.height
+      });
+
+      // Allow UI repaint
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    const cleanBytes = await newPdf.save();
+    return {
+      unlockedBuffer: cleanBytes,
+      method: 'raster',
+      numPages
+    };
+  }
 }
 
 export type PdfEditItem = 
