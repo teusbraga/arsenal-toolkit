@@ -78,6 +78,27 @@ export const CATEGORIES_LIST = [
     desc: 'Conversor HEX/RGB/HSL, contraste WCAG e gradientes.',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>`,
     path: '#/categoria/colors'
+  },
+  {
+    id: 'images',
+    name: 'Imagens',
+    desc: 'Comprimir, converter formatos, redimensionar e miniaturas.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
+    path: '#/categoria/images'
+  },
+  {
+    id: 'files',
+    name: 'Arquivos',
+    desc: 'Analisador de tipos MIME, checksum/hashes e compactador ZIP.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    path: '#/categoria/files'
+  },
+  {
+    id: 'excel',
+    name: 'Planilhas & Dados',
+    desc: 'Mini Excel client-side, visualização e fórmulas rápidas.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>`,
+    path: '#/categoria/excel'
   }
 ];
 
@@ -205,12 +226,153 @@ export const TOOLS_LIST: ToolItem[] = [
 
   // PDF
   {
-    id: 'pdf-editor',
-    name: 'Editor de PDF',
+    id: 'pdf-merge',
+    name: 'Juntar PDFs',
     category: 'pdf',
     categoryName: 'PDF',
-    description: 'Edite, una, divida e organize seus PDFs.',
-    path: '#/editor-pdf',
+    description: 'Una vários arquivos PDF em um único documento, reordenando páginas visualmente.',
+    path: '#/pdf/juntar',
+    featured: true,
+  },
+  {
+    id: 'pdf-extract',
+    name: 'Extrair Páginas',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Selecione e extraia páginas específicas de um documento PDF.',
+    path: '#/pdf/extrair',
+    featured: true,
+  },
+  {
+    id: 'pdf-organize',
+    name: 'Organizar & Girar',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Reordene páginas, gire ou remova as indesejadas de um PDF.',
+    path: '#/pdf/organizar',
+    featured: true,
+  },
+  {
+    id: 'pdf-to-image',
+    name: 'PDF para Imagem',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Extraia as páginas do seu PDF em imagens JPG ou PNG de alta qualidade.',
+    path: '#/pdf/para-imagem',
+    featured: true,
+  },
+  {
+    id: 'image-to-pdf',
+    name: 'Imagem para PDF',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Junte suas imagens e fotos em um único arquivo PDF.',
+    path: '#/pdf/imagem-para-pdf',
+    featured: true,
+  },
+  {
+    id: 'pdf-metadata',
+    name: 'Metadados & Marca-d\'água',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Edite o autor, título do PDF, adicione paginação ou marca-d\'água em todas as páginas.',
+    path: '#/pdf/metadados',
+    featured: true,
+  },
+  {
+    id: 'pdf-compress',
+    name: 'Comprimir PDF',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Reduza drasticamente o tamanho do seu arquivo PDF mantendo a legibilidade.',
+    path: '#/pdf/comprimir',
+    featured: true,
+  },
+  {
+    id: 'pdf-edit',
+    name: 'Editor Visual (Apagar & Escrever)',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Use tarjas para apagar informações de um documento e escreva novos textos por cima.',
+    path: '#/pdf/editor',
+    featured: true,
+  },
+
+  // Imagens
+  {
+    id: 'image-compress',
+    name: 'Comprimir Imagem',
+    category: 'images',
+    categoryName: 'Imagens',
+    description: 'Reduza o tamanho das suas imagens JPG, PNG e WebP para web.',
+    path: '#/imagem/comprimir',
+    featured: true,
+  },
+  {
+    id: 'image-convert',
+    name: 'Conversor de Imagens',
+    category: 'images',
+    categoryName: 'Imagens',
+    description: 'Converta arquivos em lote para JPG, PNG ou WebP.',
+    path: '#/imagem/converter',
+    featured: true,
+  },
+  {
+    id: 'image-resize',
+    name: 'Redimensionar Imagem',
+    category: 'images',
+    categoryName: 'Imagens',
+    description: 'Altere as dimensões exatas da imagem mantendo a proporção.',
+    path: '#/imagem/redimensionar',
+    featured: false,
+  },
+  {
+    id: 'image-base64',
+    name: 'Gerador de Base64',
+    category: 'images',
+    categoryName: 'Imagens',
+    description: 'Transforme imagens em código Base64 para embutir no HTML ou CSS.',
+    path: '#/imagem/base64',
+    featured: false,
+  },
+  {
+    id: 'image-thumbnails',
+    name: 'Gerador de Miniaturas (Thumbnails)',
+    category: 'images',
+    categoryName: 'Imagens',
+    description: 'Crie thumbnails para YouTube, Instagram, Stories, Twitter e Favicons.',
+    path: '#/imagem/thumbnails',
+    featured: true,
+  },
+
+  // Arquivos
+  {
+    id: 'file-checksum',
+    name: 'Verificador de Hash (Checksum)',
+    category: 'files',
+    categoryName: 'Arquivos',
+    description: 'Calcule e compare SHA-256, MD5, SHA-1 e SHA-512 de qualquer arquivo.',
+    path: '#/arquivo/checksum',
+    featured: true,
+  },
+  {
+    id: 'file-analyzer',
+    name: 'Analisador & Inspetor de Arquivos',
+    category: 'files',
+    categoryName: 'Arquivos',
+    description: 'Detecte formato real (Magic Bytes), extensões falsas, entropia e Hex Dump.',
+    path: '#/arquivo/analisador',
+    featured: true,
+  },
+
+  // Planilhas & Dados
+  {
+    id: 'mini-excel',
+    name: 'Mini Excel (Planilha Rápida)',
+    category: 'excel',
+    categoryName: 'Planilhas & Dados',
+    description: 'Crie planilhas, faça cálculos com fórmulas (SOMA, MÉDIA), formate e exporte para CSV.',
+    path: '#/excel/mini-planilha',
     featured: true,
   },
 

@@ -7,7 +7,22 @@ import { renderBasicCalculator } from '../features/calculator/basic.view';
 import { renderRuleOfThree } from '../features/calculator/ruleOfThree.view';
 import { renderCurrencyConverter } from '../features/converters/currency.view';
 import { renderUnitsConverter } from '../features/converters/units.view';
-import { renderPdfEditor } from '../features/pdf/pdf.view';
+import { renderPdfMerge } from '../features/pdf/pdf-merge.view';
+import { renderPdfExtract } from '../features/pdf/pdf-extract.view';
+import { renderPdfOrganize } from '../features/pdf/pdf-organize.view';
+import { renderPdfToImage } from '../features/pdf/pdf-to-image.view';
+import { renderImageToPdf } from '../features/pdf/image-to-pdf.view';
+import { renderPdfMetadata } from '../features/pdf/pdf-metadata.view';
+import { renderPdfCompress } from '../features/pdf/pdf-compress.view';
+import { renderPdfEdit } from '../features/pdf/pdf-edit.view';
+import { renderImageCompress } from '../features/image/image-compress.view';
+import { renderImageConvert } from '../features/image/image-convert.view';
+import { renderImageResize } from '../features/image/image-resize.view';
+import { renderImageBase64 } from '../features/image/image-base64.view';
+import { renderImageThumbnails } from '../features/image/image-thumbnails.view';
+import { renderFileChecksum } from '../features/files/file-checksum.view';
+import { renderFileAnalyzer } from '../features/files/file-analyzer.view';
+import { renderMiniExcel } from '../features/excel/mini-excel.view';
 import { renderDocumentsGenerator } from '../features/documents/documents.view';
 import { renderScientificCalculator } from '../features/calculator/scientific.view';
 import { renderFractionsCalculator } from '../features/calculator/fractions.view';
@@ -52,8 +67,38 @@ export function initRouter(appContainer: HTMLElement): void {
       renderCurrencyConverter(appContainer);
     } else if (hash === '#/conversor-unidades') {
       renderUnitsConverter(appContainer);
-    } else if (hash === '#/editor-pdf') {
-      renderPdfEditor(appContainer);
+    } else if (hash === '#/pdf/juntar') {
+      renderPdfMerge(appContainer);
+    } else if (hash === '#/pdf/extrair') {
+      renderPdfExtract(appContainer);
+    } else if (hash === '#/pdf/organizar') {
+      renderPdfOrganize(appContainer);
+    } else if (hash === '#/pdf/para-imagem') {
+      renderPdfToImage(appContainer);
+    } else if (hash === '#/pdf/imagem-para-pdf') {
+      renderImageToPdf(appContainer);
+    } else if (hash === '#/pdf/metadados') {
+      renderPdfMetadata(appContainer);
+    } else if (hash === '#/pdf/comprimir') {
+      renderPdfCompress(appContainer);
+    } else if (hash === '#/pdf/editor') {
+      renderPdfEdit(appContainer);
+    } else if (hash === '#/imagem/comprimir') {
+      renderImageCompress(appContainer);
+    } else if (hash === '#/imagem/converter') {
+      renderImageConvert(appContainer);
+    } else if (hash === '#/imagem/redimensionar') {
+      renderImageResize(appContainer);
+    } else if (hash === '#/imagem/base64') {
+      renderImageBase64(appContainer);
+    } else if (hash === '#/imagem/thumbnails') {
+      renderImageThumbnails(appContainer);
+    } else if (hash === '#/arquivo/checksum') {
+      renderFileChecksum(appContainer);
+    } else if (hash === '#/arquivo/analisador') {
+      renderFileAnalyzer(appContainer);
+    } else if (hash === '#/excel/mini-planilha') {
+      renderMiniExcel(appContainer);
     } else if (hash === '#/gerador-documentos') {
       renderDocumentsGenerator(appContainer);
     } else if (hash === '#/calculadora-cientifica') {
