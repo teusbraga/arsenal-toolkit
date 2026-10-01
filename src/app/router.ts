@@ -9,6 +9,12 @@ import { renderCurrencyConverter } from '../features/converters/currency.view';
 import { renderUnitsConverter } from '../features/converters/units.view';
 import { renderPdfEditor } from '../features/pdf/pdf.view';
 import { renderDocumentsGenerator } from '../features/documents/documents.view';
+import { renderScientificCalculator } from '../features/calculator/scientific.view';
+import { renderFractionsCalculator } from '../features/calculator/fractions.view';
+import { renderEquationsCalculator } from '../features/calculator/equations.view';
+import { renderStatisticsCalculator } from '../features/calculator/statistics.view';
+import { renderMatricesCalculator } from '../features/calculator/matrices.view';
+import { renderGraphPlotter } from '../features/calculator/graphPlotter.view';
 import { renderCategoryView } from '../features/categories/category.view';
 import { TOOLS_LIST } from './toolsRegistry';
 
@@ -40,6 +46,18 @@ export function initRouter(appContainer: HTMLElement): void {
       renderPdfEditor(appContainer);
     } else if (hash === '#/gerador-documentos') {
       renderDocumentsGenerator(appContainer);
+    } else if (hash === '#/calculadora-cientifica') {
+      renderScientificCalculator(appContainer);
+    } else if (hash === '#/fracoes-mdc-mmc') {
+      renderFractionsCalculator(appContainer);
+    } else if (hash === '#/equacoes') {
+      renderEquationsCalculator(appContainer);
+    } else if (hash === '#/estatistica') {
+      renderStatisticsCalculator(appContainer);
+    } else if (hash === '#/matrizes') {
+      renderMatricesCalculator(appContainer);
+    } else if (hash === '#/graficos-funcoes') {
+      renderGraphPlotter(appContainer);
     } else if (hash.startsWith('#/categoria/')) {
       const catId = hash.replace('#/categoria/', '');
       renderCategoryView(appContainer, catId);
