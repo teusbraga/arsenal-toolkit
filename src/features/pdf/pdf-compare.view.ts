@@ -336,8 +336,8 @@ export function renderPdfCompare(container: HTMLElement) {
       const bufA = await fileA.arrayBuffer();
       const bufB = await fileB.arrayBuffer();
 
-      const taskA = pdfjsLib.getDocument({ data: new Uint8Array(bufA) });
-      const taskB = pdfjsLib.getDocument({ data: new Uint8Array(bufB) });
+      const taskA = pdfjsLib.getDocument({ data: new Uint8Array(bufA.slice(0)) });
+      const taskB = pdfjsLib.getDocument({ data: new Uint8Array(bufB.slice(0)) });
 
       pdfDocA = await taskA.promise;
       pdfDocB = await taskB.promise;

@@ -310,7 +310,7 @@ export function renderPdfLock(container: HTMLElement) {
     try {
       fileBuffer = await file.arrayBuffer();
       // Count pages
-      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(fileBuffer) });
+      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(fileBuffer.slice(0)) });
       const pdf = await loadingTask.promise;
       pageCount = pdf.numPages;
       filePagesEl.innerText = `${pageCount} ${pageCount === 1 ? 'página' : 'páginas'}`;
