@@ -8,13 +8,9 @@ export function renderSidebar(container: HTMLElement): void {
       <!-- Header / Logo (conforme mockup) -->
       <div class="sidebar-header">
         <a href="#/" class="logo-badge">
-          <svg class="logo-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <!-- Ícone estilizado geométrico do Backpack Tools -->
-            <path d="M4 8l4-4h8l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/>
-            <path d="M9 4v4h6V4"/>
-            <line x1="8" y1="14" x2="16" y2="14"/>
-          </svg>
-          <span>Backpack Tools</span>
+          <!-- Ícone do Arsenal PDF (logo gerada) -->
+          <img src="/logo.jpg" alt="Arsenal PDF Logo" class="logo-icon-img" style="width: 24px; height: 24px; border-radius: 0; object-fit: cover;" />
+          <span style="font-weight: 700;">Arsenal PDF</span>
         </a>
       </div>
 
@@ -28,78 +24,22 @@ export function renderSidebar(container: HTMLElement): void {
           <span>Início</span>
         </a>
 
-        <a href="#/categoria/calculators" class="nav-item ${currentRoute.includes('calculat') ? 'active' : ''}" data-route="#/categoria/calculators">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="4" y="2" width="16" height="20" rx="2"/>
-            <line x1="8" y1="6" x2="16" y2="6"/>
-            <path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/>
-          </svg>
-          <span>Calculadoras</span>
-        </a>
-
-        <a href="#/categoria/converters" class="nav-item ${currentRoute.includes('convert') ? 'active' : ''}" data-route="#/categoria/converters">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M7 10l5-5 5 5M7 14l5 5 5-5"/>
-          </svg>
-          <span>Conversores</span>
-        </a>
-
         <a href="#/categoria/pdf" class="nav-item ${currentRoute.includes('pdf') ? 'active' : ''}" data-route="#/categoria/pdf">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
           </svg>
-          <span>PDF</span>
+          <span>Ferramentas PDF</span>
         </a>
 
-        <a href="#/categoria/documents" class="nav-item ${currentRoute.includes('document') ? 'active' : ''}" data-route="#/categoria/documents">
+        <a href="#/utilitarios" class="nav-item ${currentRoute.includes('utilitarios') ? 'active' : ''}" data-route="#/utilitarios">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
-          <span>Documentos</span>
-        </a>
-
-        <a href="#/categoria/fitness" class="nav-item ${currentRoute.includes('fitness') ? 'active' : ''}" data-route="#/categoria/fitness">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 4v16M18 4v16M2 8h4M2 16h4M18 8h4M18 16h4M6 12h12"/>
-          </svg>
-          <span>Fitness</span>
-        </a>
-
-        <a href="#/categoria/financial" class="nav-item ${currentRoute.includes('finan') || currentRoute.includes('juros') ? 'active' : ''}" data-route="#/categoria/financial">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-          <span>Financeiro</span>
-        </a>
-
-        <a href="#/categoria/text" class="nav-item ${currentRoute.includes('text') || currentRoute.includes('texto') ? 'active' : ''}" data-route="#/categoria/text">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
-          </svg>
-          <span>Texto</span>
-        </a>
-
-        <a href="#/categoria/devtools" class="nav-item ${currentRoute.includes('dev') ? 'active' : ''}" data-route="#/categoria/devtools">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-          </svg>
-          <span>Dev Tools</span>
-        </a>
-
-        <a href="#/categoria/generators" class="nav-item ${currentRoute.includes('gerador') ? 'active' : ''}" data-route="#/categoria/generators">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          <span>Geradores</span>
-        </a>
-
-        <a href="#/categoria/colors" class="nav-item ${currentRoute.includes('cor') ? 'active' : ''}" data-route="#/categoria/colors">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-          </svg>
-          <span>Cores & CSS</span>
+          <span>Utilitários do Arsenal</span>
         </a>
 
         <a href="#/favoritos" class="nav-item ${currentRoute === '#/favoritos' ? 'active' : ''}" data-route="#/favoritos">
@@ -110,13 +50,18 @@ export function renderSidebar(container: HTMLElement): void {
         </a>
       </nav>
 
-      <!-- Rodapé do Usuário (conforme mockup) -->
+      <!-- Rodapé do Usuário -->
       <div class="sidebar-footer">
         <div class="user-mini">
-          <div class="user-avatar">MS</div>
+          <div class="user-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
           <div class="user-info">
-            <span class="user-name">Mariana Silva</span>
-            <span class="user-role">Pro • Modo Local</span>
+            <span class="user-name">Minha Conta</span>
+            <span class="user-role">Modo Local</span>
           </div>
         </div>
       </div>
