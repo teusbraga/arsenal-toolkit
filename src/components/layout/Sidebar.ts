@@ -60,6 +60,20 @@ export function renderSidebar(container: HTMLElement): void {
           <span>Documentos</span>
         </a>
 
+        <a href="#/categoria/fitness" class="nav-item ${currentRoute.includes('fitness') ? 'active' : ''}" data-route="#/categoria/fitness">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 4v16M18 4v16M2 8h4M2 16h4M18 8h4M18 16h4M6 12h12"/>
+          </svg>
+          <span>Fitness</span>
+        </a>
+
+        <a href="#/categoria/financial" class="nav-item ${currentRoute.includes('finan') || currentRoute.includes('juros') ? 'active' : ''}" data-route="#/categoria/financial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span>Financeiro</span>
+        </a>
+
         <a href="#/favoritos" class="nav-item ${currentRoute === '#/favoritos' ? 'active' : ''}" data-route="#/favoritos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>

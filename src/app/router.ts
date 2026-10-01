@@ -15,6 +15,12 @@ import { renderEquationsCalculator } from '../features/calculator/equations.view
 import { renderStatisticsCalculator } from '../features/calculator/statistics.view';
 import { renderMatricesCalculator } from '../features/calculator/matrices.view';
 import { renderGraphPlotter } from '../features/calculator/graphPlotter.view';
+import { renderDatesCalculator } from '../features/converters/dates.view';
+import { renderFitnessCalculator } from '../features/fitness/fitness.view';
+import { renderCompoundInterest } from '../features/financial/compoundInterest.view';
+import { renderFinancingCalculator } from '../features/financial/financing.view';
+import { renderCashVsInstallment } from '../features/financial/cashVsInstallment.view';
+import { renderBillSplit } from '../features/financial/billSplit.view';
 import { renderCategoryView } from '../features/categories/category.view';
 import { TOOLS_LIST } from './toolsRegistry';
 
@@ -58,6 +64,18 @@ export function initRouter(appContainer: HTMLElement): void {
       renderMatricesCalculator(appContainer);
     } else if (hash === '#/graficos-funcoes') {
       renderGraphPlotter(appContainer);
+    } else if (hash === '#/calculadora-datas') {
+      renderDatesCalculator(appContainer);
+    } else if (hash === '#/fitness') {
+      renderFitnessCalculator(appContainer);
+    } else if (hash === '#/juros-compostos') {
+      renderCompoundInterest(appContainer);
+    } else if (hash === '#/financiamento') {
+      renderFinancingCalculator(appContainer);
+    } else if (hash === '#/a-vista-vs-parcelado') {
+      renderCashVsInstallment(appContainer);
+    } else if (hash === '#/divisao-conta') {
+      renderBillSplit(appContainer);
     } else if (hash.startsWith('#/categoria/')) {
       const catId = hash.replace('#/categoria/', '');
       renderCategoryView(appContainer, catId);

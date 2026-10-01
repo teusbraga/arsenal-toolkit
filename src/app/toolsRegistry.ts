@@ -36,6 +36,20 @@ export const CATEGORIES_LIST = [
     desc: 'Modelos, recibos, propostas e declarações.',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
     path: '#/categoria/documents'
+  },
+  {
+    id: 'fitness',
+    name: 'Fitness & Saúde',
+    desc: 'IMC, BMR, TDEE, macros, pace de corrida e 1RM.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M2 8h4M2 16h4M18 8h4M18 16h4M6 12h12"/></svg>`,
+    path: '#/categoria/fitness'
+  },
+  {
+    id: 'financial',
+    name: 'Financeiro',
+    desc: 'Juros compostos, financiamentos SAC/Price e margem.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+    path: '#/categoria/financial'
   }
 ];
 
@@ -181,5 +195,59 @@ export const TOOLS_LIST: ToolItem[] = [
     description: 'Crie recibos, contratos e propostas na hora.',
     path: '#/gerador-documentos',
     featured: true,
+  },
+  {
+    id: 'dates-calc',
+    name: 'Calculadora de Datas & Dias Úteis',
+    category: 'converters',
+    categoryName: 'Conversores',
+    description: 'Diferença de datas, dias úteis, prazos e fusos.',
+    path: '#/calculadora-datas',
+    featured: false,
+  },
+  {
+    id: 'fitness-calc',
+    name: 'Saúde & Fitness',
+    category: 'fitness',
+    categoryName: 'Fitness & Saúde',
+    description: 'IMC, BMR, TDEE, macros, pace de corrida e 1RM.',
+    path: '#/fitness',
+    featured: true,
+  },
+  {
+    id: 'compound-interest',
+    name: 'Juros Compostos',
+    category: 'financial',
+    categoryName: 'Financeiro',
+    description: 'Simulação patrimonial com aportes mensais e evolução.',
+    path: '#/juros-compostos',
+    featured: true,
+  },
+  {
+    id: 'financing-calc',
+    name: 'Simulador de Financiamento',
+    category: 'financial',
+    categoryName: 'Financeiro',
+    description: 'Comparativo SAC vs PRICE para imóveis e veículos.',
+    path: '#/financiamento',
+    featured: false,
+  },
+  {
+    id: 'cash-vs-installment',
+    name: 'À Vista vs Parcelado & Margem',
+    category: 'financial',
+    categoryName: 'Financeiro',
+    description: 'Avaliação de desconto com CDI e markup comercial.',
+    path: '#/a-vista-vs-parcelado',
+    featured: false,
+  },
+  {
+    id: 'bill-split',
+    name: 'Divisão de Conta & Gorjeta',
+    category: 'financial',
+    categoryName: 'Financeiro',
+    description: 'Divisão rápida de bar, restaurante e taxa de serviço.',
+    path: '#/divisao-conta',
+    featured: false,
   }
 ];
