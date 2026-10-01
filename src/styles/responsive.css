@@ -1,0 +1,67 @@
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  .app-main {
+    margin-left: 0;
+    padding-bottom: calc(var(--bottom-nav-height) + 16px);
+  }
+
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .view-container {
+    padding: 20px 16px;
+  }
+
+  .search-box {
+    display: none; /* No mobile a busca pode ficar em modal ou topo da lista */
+  }
+
+  .mobile-search-box {
+    display: flex;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-bottom-nav {
+    display: flex;
+  }
+
+  .tool-view-wrapper {
+    padding: 16px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-search-box {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: none;
+  }
+}

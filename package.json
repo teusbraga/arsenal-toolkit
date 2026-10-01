@@ -1,0 +1,19 @@
+{
+  "name": "backpack-tools",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "workbox-window": "^7.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}
