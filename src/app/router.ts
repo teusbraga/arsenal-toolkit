@@ -23,6 +23,8 @@ import { renderCashVsInstallment } from '../features/financial/cashVsInstallment
 import { renderBillSplit } from '../features/financial/billSplit.view';
 import { renderTextView } from '../features/text/text.view';
 import { renderDevTools } from '../features/devtools/devtools.view';
+import { renderGeneratorsView } from '../features/generators/generators.view';
+import { renderColorsView } from '../features/colors/colors.view';
 import { renderCategoryView } from '../features/categories/category.view';
 import { TOOLS_LIST } from './toolsRegistry';
 
@@ -82,6 +84,10 @@ export function initRouter(appContainer: HTMLElement): void {
       renderTextView(appContainer);
     } else if (hash === '#/dev-tools') {
       renderDevTools(appContainer);
+    } else if (hash === '#/geradores') {
+      renderGeneratorsView(appContainer);
+    } else if (hash === '#/cores-css') {
+      renderColorsView(appContainer);
     } else if (hash.startsWith('#/categoria/')) {
       const catId = hash.replace('#/categoria/', '');
       renderCategoryView(appContainer, catId);

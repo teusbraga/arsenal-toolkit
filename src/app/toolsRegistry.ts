@@ -64,6 +64,20 @@ export const CATEGORIES_LIST = [
     desc: 'JSON Formatter, Base64, Hashes, UUID, JWT e Regex.',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
     path: '#/categoria/devtools'
+  },
+  {
+    id: 'generators',
+    name: 'Geradores',
+    desc: 'Senhas seguras, QR Code, código de barras e sorteios.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+    path: '#/categoria/generators'
+  },
+  {
+    id: 'colors',
+    name: 'Cores & CSS',
+    desc: 'Conversor HEX/RGB/HSL, contraste WCAG e gradientes.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>`,
+    path: '#/categoria/colors'
   }
 ];
 
@@ -280,6 +294,24 @@ export const TOOLS_LIST: ToolItem[] = [
     categoryName: 'Developer Tools',
     description: 'JSON Formatter, Base64, Hashes, UUID, JWT e Regex.',
     path: '#/dev-tools',
+    featured: true,
+  },
+  {
+    id: 'generators-tools',
+    name: 'Geradores Essenciais',
+    category: 'generators',
+    categoryName: 'Geradores',
+    description: 'Senhas seguras, QR Code, código de barras e sorteios.',
+    path: '#/geradores',
+    featured: true,
+  },
+  {
+    id: 'colors-tools',
+    name: 'Cores & CSS Design',
+    category: 'colors',
+    categoryName: 'Cores & CSS',
+    description: 'Conversor HEX/RGB/HSL, contraste WCAG e gradientes.',
+    path: '#/cores-css',
     featured: true,
   }
 ];
