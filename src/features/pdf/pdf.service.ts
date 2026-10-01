@@ -36,7 +36,7 @@ export class PdfService {
     const buffer = await this.readFileAsArrayBuffer(file);
     
     // Load with PDF.js to get info and render thumbnail
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) });
     const pdf = await loadingTask.promise;
     
     const numPages = pdf.numPages;
@@ -99,7 +99,7 @@ export class PdfService {
    */
   static async loadAllPagesThumbnails(file: File, onProgress?: (rendered: number, total: number) => void): Promise<{ buffer: ArrayBuffer, thumbnails: { pageNumber: number, url: string }[], numPages: number }> {
     const buffer = await this.readFileAsArrayBuffer(file);
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) });
     const pdf = await loadingTask.promise;
     const numPages = pdf.numPages;
     const thumbnails: { pageNumber: number, url: string }[] = [];
@@ -200,7 +200,7 @@ export class PdfService {
    */
   static async pdfToImagesZip(file: File, format: 'image/jpeg' | 'image/png' = 'image/jpeg', onProgress?: (rendered: number, total: number) => void): Promise<Blob> {
     const buffer = await this.readFileAsArrayBuffer(file);
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) });
     const pdf = await loadingTask.promise;
     const numPages = pdf.numPages;
     const zip = new JSZip();
@@ -248,7 +248,7 @@ export class PdfService {
 
     for (const file of imageFiles) {
       const buffer = await this.readFileAsArrayBuffer(file);
-      const uint8Array = new Uint8Array(buffer);
+      const uint8Array = new Uint8Array(buffer.slice(0));
       
       let image;
       if (file.type === 'image/png') {
@@ -353,7 +353,7 @@ export class PdfService {
     onProgress?: (rendered: number, total: number) => void
   ): Promise<Uint8Array> {
     const buffer = await this.readFileAsArrayBuffer(file);
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) });
     const originalPdf = await loadingTask.promise;
     const numPages = originalPdf.numPages;
     
@@ -493,7 +493,7 @@ export class PdfService {
     charCount: number;
     wordCount: number;
   }> {
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
     const pdf = await loadingTask.promise;
     const pageCount = pdf.numPages;
 
@@ -628,7 +628,7 @@ export class PdfService {
     colCount: number;
   }> {
     const delimiter = options?.delimiter || ';';
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
     const pdf = await loadingTask.promise;
     const pageCount = pdf.numPages;
 
@@ -760,12 +760,12 @@ export class PdfService {
     needsPassword: boolean;
   }> {
     try {
-      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
       await loadingTask.promise;
 
       // Check if pdf-lib considers it encrypted
       try {
-        await PDFDocument.load(arrayBuffer);
+        await PDFDocument.load(arrayBuffer.slice(0));
         return { isEncrypted: false, needsPassword: false };
       } catch (err: any) {
         if (err.name === 'EncryptedPDFError' || err.message?.toLowerCase().includes('encrypted')) {
@@ -792,7 +792,7 @@ export class PdfService {
     // Attempt 1: Direct bypass via pdf-lib ignoreEncryption (works for owner/permission passwords)
     if (!password) {
       try {
-        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const pdfDoc = await PDFDocument.load(arrayBuffer.slice(0), { ignoreEncryption: true });
         const savedBytes = await pdfDoc.save();
         const testDoc = await PDFDocument.load(savedBytes);
         return {
@@ -807,7 +807,7 @@ export class PdfService {
 
     // Attempt 2: Decrypt via pdfjs-dist with password and re-encode
     const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(arrayBuffer),
+      data: new Uint8Array(arrayBuffer.slice(0)),
       password: password || ''
     });
 
