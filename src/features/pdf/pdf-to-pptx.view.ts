@@ -55,8 +55,8 @@ export function renderPdfToPptx(container: HTMLElement) {
         <div style="margin-bottom: 18px;">
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Modo de Conversão dos Slides</label>
           <select id="pdftopptx-mode" class="form-input" style="font-size: 0.9rem;">
-            <option value="visual" selected>Alta Fidelidade Visual HD (Mantém 100% do design, fontes e gráficos)</option>
-            <option value="editable">Caixas de Texto Editáveis (Reconstrói textos nas coordenadas X, Y do slide)</option>
+            <option value="editable" selected>Caixas de Texto Editáveis (Reconstrói textos nas coordenadas X, Y, fontes e cores)</option>
+            <option value="visual">Alta Fidelidade Visual HD (Apenas imagem, sem texto editável)</option>
           </select>
         </div>
 
@@ -150,7 +150,7 @@ export function renderPdfToPptx(container: HTMLElement) {
       const mode = modeSelect.value as 'visual' | 'editable';
       const { pptxBlob, slideCount } = await OfficeService.pdfToPptx(fileBuffer, {
         mode,
-        onProgress: (curr, total) => {
+        onProgress: (curr: number, total: number) => {
           const pct = Math.round((curr / total) * 100);
           progressText.innerText = `Montando slide ${curr} de ${total}...`;
           progressPct.innerText = `${pct}%`;

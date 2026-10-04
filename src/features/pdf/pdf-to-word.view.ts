@@ -65,6 +65,11 @@ export function renderPdfToWord(container: HTMLElement) {
               <option value="Times New Roman">Fonte: Times New Roman</option>
             </select>
 
+            <select id="pdftoword-mode" class="form-input" style="height: 36px; width: auto; padding: 0 10px; font-size: 0.85rem; border-color: #2563eb; color: #2563eb;">
+              <option value="absolute" selected>Alta Fidelidade Visual (IDÊNTICO 1:1 - Tabelas, Cores e Imagens)</option>
+              <option value="flow">Texto Editável (Fluxo de Parágrafos)</option>
+            </select>
+
             <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); background: var(--bg-page); border: 1px solid var(--border-color); height: 36px; padding: 0 10px; border-radius: 6px; cursor: pointer;">
               <input type="checkbox" id="pdftoword-pagebreaks" checked />
               <span>Quebras de Página</span>
@@ -110,8 +115,13 @@ export function renderPdfToWord(container: HTMLElement) {
   const btnReset = container.querySelector('#btn-pdftoword-reset') as HTMLButtonElement;
   const btnDownload = container.querySelector('#btn-pdftoword-download') as HTMLButtonElement;
   const previewEl = container.querySelector('#pdftoword-preview') as HTMLDivElement;
+  const modeSelect = container.querySelector('#pdftoword-mode') as HTMLSelectElement;
 
   btnBack.addEventListener('click', () => { window.location.hash = ''; });
+  
+  fontSelect.addEventListener('change', () => runConversion());
+  pageBreaksCheck.addEventListener('change', () => runConversion());
+  if (modeSelect) modeSelect.addEventListener('change', () => runConversion());
 
   btnReset.addEventListener('click', () => {
     selectedFile = null;
@@ -156,9 +166,12 @@ export function renderPdfToWord(container: HTMLElement) {
     btnDownload.disabled = true;
 
     try {
+      const modeSelect = container.querySelector('#pdftoword-mode') as HTMLSelectElement;
+      
       const res = await OfficeService.pdfToDocx(fileBuffer, {
         fontFamily: fontSelect.value,
         includePageBreaks: pageBreaksCheck.checked,
+        mode: modeSelect ? (modeSelect.value as 'flow' | 'absolute') : 'absolute',
       });
 
       currentDocxBlob = res.docxBlob;
