@@ -20,6 +20,10 @@ import { renderPdfToExcel } from '../features/pdf/pdf-to-excel.view';
 import { renderPdfUnlock } from '../features/pdf/pdf-unlock.view';
 import { renderPdfLock } from '../features/pdf/pdf-lock.view';
 import { renderPdfCompare } from '../features/pdf/pdf-compare.view';
+import { renderPdfToWord } from '../features/pdf/pdf-to-word.view';
+import { renderPdfToPptx } from '../features/pdf/pdf-to-pptx.view';
+import { renderWordToPdf } from '../features/pdf/word-to-pdf.view';
+import { renderExcelToPdf } from '../features/pdf/excel-to-pdf.view';
 import { renderImageCompress } from '../features/image/image-compress.view';
 import { renderImageConvert } from '../features/image/image-convert.view';
 import { renderImageResize } from '../features/image/image-resize.view';
@@ -90,8 +94,16 @@ export function initRouter(appContainer: HTMLElement): void {
       renderPdfEdit(appContainer);
     } else if (hash === '#/pdf/para-texto') {
       renderPdfToText(appContainer);
+    } else if (hash === '#/pdf/para-word') {
+      renderPdfToWord(appContainer);
     } else if (hash === '#/pdf/para-excel') {
       renderPdfToExcel(appContainer);
+    } else if (hash === '#/pdf/para-pptx') {
+      renderPdfToPptx(appContainer);
+    } else if (hash === '#/pdf/word-para-pdf') {
+      renderWordToPdf(appContainer);
+    } else if (hash === '#/pdf/excel-para-pdf') {
+      renderExcelToPdf(appContainer);
     } else if (hash === '#/pdf/desbloquear') {
       renderPdfUnlock(appContainer);
     } else if (hash === '#/pdf/bloquear') {

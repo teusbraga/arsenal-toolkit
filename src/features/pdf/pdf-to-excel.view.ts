@@ -1,4 +1,5 @@
 import { PdfService } from './pdf.service';
+import { OfficeService } from './office.service';
 import { historyManager } from '../../core/history/history.manager';
 
 export function renderPdfToExcel(container: HTMLElement) {
@@ -22,7 +23,7 @@ export function renderPdfToExcel(container: HTMLElement) {
         <button class="btn-back" id="btn-back-pdftoexcel" title="Voltar">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <h2 class="tool-header-title">PDF para Tabela / Excel (CSV)</h2>
+        <h2 class="tool-header-title">PDF para Excel (.XLSX & .CSV)</h2>
       </div>
       <button class="btn-favorite" id="btn-fav-pdftoexcel" title="Adicionar aos Favoritos">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -31,9 +32,9 @@ export function renderPdfToExcel(container: HTMLElement) {
 
     <div id="pdftoexcel-setup-area">
       <div class="dropzone-box" id="pdftoexcel-dropzone">
-        <svg class="dropzone-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        <svg class="dropzone-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
         <div class="dropzone-text">Arraste seu PDF com tabelas ou relatórios</div>
-        <div class="dropzone-hint">Ideal para faturas, extratos bancários, listas de produtos e tabelas financeiras</div>
+        <div class="dropzone-hint">Exporta planilhas .XLSX nativas do Microsoft Excel (com múltiplas abas) ou .CSV</div>
         <input type="file" id="pdftoexcel-file-input" accept="application/pdf" style="display: none;" />
       </div>
     </div>
@@ -62,15 +63,23 @@ export function renderPdfToExcel(container: HTMLElement) {
 
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <div>
-              <label style="font-size: 0.75rem; color: var(--text-tertiary); display: block; margin-bottom: 2px;">Separador CSV:</label>
-              <select id="pdftoexcel-delim-select" class="form-input" style="height: 34px; padding: 2px 8px; font-size: 0.8rem;">
-                <option value=";" selected>; (Ponto e Vírgula - Excel Brasil)</option>
-                <option value=",">, (Vírgula - Internacional)</option>
+              <label style="font-size: 0.75rem; color: var(--text-tertiary); display: block; margin-bottom: 2px;">Modo Excel (.XLSX):</label>
+              <select id="pdftoexcel-xlsx-mode" class="form-input" style="height: 34px; padding: 2px 8px; font-size: 0.8rem;">
+                <option value="consolidated" selected>1 Aba Consolidada</option>
+                <option value="per-page">1 Aba por Página do PDF</option>
               </select>
             </div>
 
             <div>
-              <label style="font-size: 0.75rem; color: var(--text-tertiary); display: block; margin-bottom: 2px;">Páginas:</label>
+              <label style="font-size: 0.75rem; color: var(--text-tertiary); display: block; margin-bottom: 2px;">Separador CSV:</label>
+              <select id="pdftoexcel-delim-select" class="form-input" style="height: 34px; padding: 2px 8px; font-size: 0.8rem;">
+                <option value=";" selected>; (Ponto e Vírgula)</option>
+                <option value=",">, (Vírgula)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-tertiary); display: block; margin-bottom: 2px;">Prévia:</label>
               <select id="pdftoexcel-page-select" class="form-input" style="height: 34px; padding: 2px 8px; font-size: 0.8rem;">
                 <option value="0" selected>Todas as páginas</option>
               </select>
@@ -90,12 +99,17 @@ export function renderPdfToExcel(container: HTMLElement) {
           Copiar CSV
         </button>
 
-        <button class="btn-primary" id="btn-pdftoexcel-download" style="height: 36px; padding: 0 14px; font-size: 0.85rem; width: auto;">
+        <button class="btn-back" id="btn-pdftoexcel-download" style="height: 36px; padding: 0 14px; font-size: 0.85rem;">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Baixar Arquivo .CSV
+          Baixar .CSV
         </button>
 
-        <button class="btn-primary" id="btn-pdftoexcel-open-mini" style="height: 36px; padding: 0 16px; font-size: 0.85rem; width: auto; background: #059669; border-color: #059669;">
+        <button class="btn-primary" id="btn-pdftoexcel-xlsx" style="height: 36px; padding: 0 16px; font-size: 0.85rem; width: auto; background: #16a34a; border-color: #16a34a;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Baixar Excel (.XLSX)
+        </button>
+
+        <button class="btn-primary" id="btn-pdftoexcel-open-mini" style="height: 36px; padding: 0 16px; font-size: 0.85rem; width: auto;">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
           Abrir no Mini Excel
         </button>
@@ -303,6 +317,36 @@ export function renderPdfToExcel(container: HTMLElement) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  // Download Native Excel (.XLSX)
+  const btnXlsx = container.querySelector('#btn-pdftoexcel-xlsx') as HTMLButtonElement;
+  const xlsxModeSelect = container.querySelector('#pdftoexcel-xlsx-mode') as HTMLSelectElement;
+
+  btnXlsx.addEventListener('click', async () => {
+    if (!fileBuffer || !selectedFile) return;
+    const origHtml = btnXlsx.innerHTML;
+    btnXlsx.innerText = 'Gerando .XLSX...';
+    btnXlsx.disabled = true;
+
+    try {
+      const mode = (xlsxModeSelect.value as 'consolidated' | 'per-page') || 'consolidated';
+      const { xlsxBlob } = await OfficeService.pdfToXlsx(fileBuffer, { mode });
+      const url = URL.createObjectURL(xlsxBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedFile.name.replace(/\.[^/.]+$/, "")}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error(err);
+      alert('Falha ao gerar arquivo .XLSX.');
+    } finally {
+      btnXlsx.innerHTML = origHtml;
+      btnXlsx.disabled = false;
+    }
   });
 
   // Open in Mini Excel
