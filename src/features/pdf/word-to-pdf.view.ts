@@ -1,11 +1,15 @@
-import { OfficeService } from './office.service';
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import { WordToPdfService } from './word-to-pdf.service';
 import { historyManager } from '../../core/history/history.manager';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export function renderWordToPdf(container: HTMLElement) {
   let selectedFile: File | null = null;
   let fileBuffer: ArrayBuffer | null = null;
   let currentPdfBytes: Uint8Array | null = null;
-  let isProcessing = false;
+  let pageCount = 0;
 
   container.innerHTML = `
     <div class="tool-view-header">
@@ -27,20 +31,20 @@ export function renderWordToPdf(container: HTMLElement) {
           <polyline points="14 2 14 8 20 8"/>
         </svg>
         <div class="dropzone-text">Arraste seu documento Word (.DOCX) para converter em PDF</div>
-        <div class="dropzone-hint">Lê títulos, parágrafos, listas e tabelas nativamente e gera um PDF A4 vetorial</div>
+        <div class="dropzone-hint">Gera PDF Vetorial nativo com texto selecionável, cores reais e imagens posicionadas</div>
         <input type="file" id="wordtopdf-file-input" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none;" />
       </div>
     </div>
 
     <div id="wordtopdf-workspace-area" style="display: none;">
       <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
           <div>
             <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-tertiary); font-weight: 600;">Documento Word Carregado</div>
             <div id="wordtopdf-file-name" style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 2px 0;">-</div>
             <div style="display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
               <span style="background: var(--bg-page); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; color: var(--text-secondary);">
-                Páginas PDF: <strong id="wordtopdf-pages" style="color: var(--text-primary);">0</strong>
+                Páginas: <strong id="wordtopdf-pages" style="color: var(--text-primary);">0</strong>
               </span>
               <span style="background: var(--bg-page); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; color: var(--text-secondary);">
                 Blocos: <strong id="wordtopdf-paras" style="color: var(--text-primary);">0</strong>
@@ -48,45 +52,43 @@ export function renderWordToPdf(container: HTMLElement) {
               <span style="background: var(--bg-page); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; color: var(--text-secondary);">
                 Palavras: <strong id="wordtopdf-words" style="color: var(--text-primary);">0</strong>
               </span>
+              <span style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.25); color: #2563eb; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                ✨ Texto 100% Selecionável (Vetorial)
+              </span>
             </div>
           </div>
 
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <select id="wordtopdf-font" class="form-input" style="height: 36px; width: auto; padding: 0 10px; font-size: 0.85rem;">
-              <option value="sans" selected>Tipografia: Moderna (Helvetica)</option>
-              <option value="serif">Tipografia: Clássica (Times)</option>
-            </select>
-
-            <select id="wordtopdf-size" class="form-input" style="height: 36px; width: auto; padding: 0 10px; font-size: 0.85rem;">
-              <option value="10">Fonte: 10pt</option>
-              <option value="11" selected>Fonte: 11pt (Padrão)</option>
-              <option value="12">Fonte: 12pt</option>
-            </select>
-
-            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); background: var(--bg-page); border: 1px solid var(--border-color); height: 36px; padding: 0 10px; border-radius: 6px; cursor: pointer;">
-              <input type="checkbox" id="wordtopdf-pagenums" checked />
-              <span>Numerar Páginas</span>
-            </label>
-
-            <button class="btn-back" id="btn-wordtopdf-reset" style="height: 36px; padding: 0 12px; font-size: 0.85rem;">
+            <button class="btn-back" id="btn-wordtopdf-reset" style="height: 38px; padding: 0 14px; font-size: 0.85rem;">
               Trocar Arquivo
             </button>
 
-            <button class="btn-primary" id="btn-wordtopdf-download" style="height: 36px; padding: 0 16px; font-size: 0.85rem; width: auto;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <button class="btn-primary" id="btn-wordtopdf-download" style="height: 38px; padding: 0 18px; font-size: 0.85rem; width: auto; font-weight: 600;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Baixar PDF (.PDF)
             </button>
+          </div>
+        </div>
+
+        <!-- Progress Box -->
+        <div id="wordtopdf-progress-box" style="display: none; margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-secondary);">
+            <span id="wordtopdf-progress-text">Gerando documento PDF vetorial...</span>
+            <span id="wordtopdf-progress-pct" style="font-weight: 700; color: #2563eb;">100%</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: var(--bg-page); border-radius: 99px; overflow: hidden;">
+            <div id="wordtopdf-progress-bar" style="width: 100%; height: 100%; background: #2563eb;"></div>
           </div>
         </div>
       </div>
 
       <!-- Document Preview -->
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 24px; max-height: 540px; overflow-y: auto;">
-        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700; margin-bottom: 12px;">
-          Pré-visualização do Conteúdo do Documento
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; max-height: 650px; overflow-y: auto;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700; margin-bottom: 14px;">
+          Pré-visualização do PDF Gerado (Texto Selecionável e Imagens)
         </div>
-        <div id="wordtopdf-preview" style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; color: var(--text-primary); font-size: 0.95rem;">
-          Processando...
+        <div id="wordtopdf-preview" style="background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 250px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <div style="text-align: center; color: var(--text-secondary); padding: 40px 0;">Carregando visualização...</div>
         </div>
       </div>
     </div>
@@ -103,13 +105,14 @@ export function renderWordToPdf(container: HTMLElement) {
   const parasEl = container.querySelector('#wordtopdf-paras') as HTMLElement;
   const wordsEl = container.querySelector('#wordtopdf-words') as HTMLElement;
 
-  const fontSelect = container.querySelector('#wordtopdf-font') as HTMLSelectElement;
-  const sizeSelect = container.querySelector('#wordtopdf-size') as HTMLSelectElement;
-  const pageNumsCheck = container.querySelector('#wordtopdf-pagenums') as HTMLInputElement;
-
   const btnReset = container.querySelector('#btn-wordtopdf-reset') as HTMLButtonElement;
   const btnDownload = container.querySelector('#btn-wordtopdf-download') as HTMLButtonElement;
   const previewEl = container.querySelector('#wordtopdf-preview') as HTMLDivElement;
+
+  const progressBox = container.querySelector('#wordtopdf-progress-box') as HTMLDivElement;
+  const progressText = container.querySelector('#wordtopdf-progress-text') as HTMLSpanElement;
+  const progressPct = container.querySelector('#wordtopdf-progress-pct') as HTMLSpanElement;
+  const progressBar = container.querySelector('#wordtopdf-progress-bar') as HTMLDivElement;
 
   btnBack.addEventListener('click', () => { window.location.hash = ''; });
 
@@ -120,6 +123,7 @@ export function renderWordToPdf(container: HTMLElement) {
     fileInput.value = '';
     setupArea.style.display = 'block';
     workspaceArea.style.display = 'none';
+    progressBox.style.display = 'none';
   });
 
   dropzone.addEventListener('click', () => fileInput.click());
@@ -144,54 +148,71 @@ export function renderWordToPdf(container: HTMLElement) {
     fileNameEl.innerText = file.name;
     setupArea.style.display = 'none';
     workspaceArea.style.display = 'block';
-
-    fileBuffer = await file.arrayBuffer();
-    await runConversion(true);
-  }
-
-  async function runConversion(recordHistory = false) {
-    if (!fileBuffer || !selectedFile || isProcessing) return;
-    isProcessing = true;
+    progressBox.style.display = 'block';
     btnDownload.disabled = true;
 
     try {
-      const res = await OfficeService.wordToPdf(fileBuffer, {
-        fontStyle: fontSelect.value as 'sans' | 'serif',
-        fontSize: parseInt(sizeSelect.value, 10) || 11,
-        includePageNumbers: pageNumsCheck.checked,
-      });
+      fileBuffer = await file.arrayBuffer();
+      progressText.innerText = 'Processando documento Word e compilando PDF vetorial...';
+      progressPct.innerText = '50%';
+      progressBar.style.width = '50%';
 
+      const res = await WordToPdfService.convertDocxToPdf(fileBuffer);
       currentPdfBytes = res.pdfBytes;
+      pageCount = res.pageCount;
       pagesEl.innerText = res.pageCount.toString();
       parasEl.innerText = res.paragraphCount.toLocaleString();
       wordsEl.innerText = res.wordCount.toLocaleString();
-      previewEl.innerHTML = res.previewHtml;
 
-      if (recordHistory) {
-        historyManager.record(
-          'word-to-pdf',
-          'pdf',
-          'Word para PDF (.DOCX)',
-          selectedFile.name,
-          `${res.pageCount} páginas • ${res.wordCount.toLocaleString()} palavras`,
-          {}
-        );
+      progressText.innerText = 'Renderizando pré-visualização vetorial...';
+      progressPct.innerText = '85%';
+      progressBar.style.width = '85%';
+
+      // Renderiza as páginas do PDF gerado no canvas de pré-visualização usando PDF.js
+      // REGRA MANDATÓRIA (GEMINI.md): Clona o buffer com .slice(0) antes de enviar ao pdfjsLib
+      const safeBuffer = res.pdfBytes.buffer.slice(
+        res.pdfBytes.byteOffset,
+        res.pdfBytes.byteOffset + res.pdfBytes.byteLength
+      );
+      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(safeBuffer) });
+      const pdf = await loadingTask.promise;
+
+      previewEl.innerHTML = '';
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const vp = page.getViewport({ scale: 1.2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width;
+        canvas.height = vp.height;
+        canvas.style.maxWidth = '100%';
+        canvas.style.boxShadow = '0 4px 18px rgba(0, 0, 0, 0.12)';
+        canvas.style.borderRadius = '4px';
+        canvas.style.background = '#ffffff';
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          await page.render({ canvasContext: ctx, viewport: vp } as any).promise;
+        }
+        previewEl.appendChild(canvas);
       }
+
+      progressText.innerText = 'PDF gerado com sucesso!';
+      progressPct.innerText = '100%';
+      progressBar.style.width = '100%';
+      setTimeout(() => { progressBox.style.display = 'none'; }, 600);
+
+      btnDownload.disabled = false;
     } catch (err: any) {
       console.error(err);
-      previewEl.innerHTML = `<div style="color:#ef4444;padding:16px;">Erro ao processar arquivo .DOCX: ${err?.message || 'Formato incompatível.'}</div>`;
-    } finally {
-      isProcessing = false;
-      btnDownload.disabled = false;
+      previewEl.innerHTML = `<div style="color:#ef4444;padding:16px;">Erro ao processar o arquivo .DOCX: ${err?.message || 'Arquivo corrompido ou formato incompatível.'}</div>`;
+      progressBox.style.display = 'none';
+      btnDownload.disabled = true;
     }
   }
 
-  fontSelect.addEventListener('change', () => runConversion(false));
-  sizeSelect.addEventListener('change', () => runConversion(false));
-  pageNumsCheck.addEventListener('change', () => runConversion(false));
-
   btnDownload.addEventListener('click', () => {
-    if (!currentPdfBytes || !selectedFile) return;
+    if (!selectedFile || !currentPdfBytes) return;
+
     const blob = new Blob([currentPdfBytes as any], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -201,5 +222,14 @@ export function renderWordToPdf(container: HTMLElement) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    historyManager.record(
+      'word-to-pdf',
+      'pdf',
+      'Word para PDF (.DOCX)',
+      selectedFile.name,
+      `${pageCount} páginas (Texto 100% Selecionável)`,
+      {}
+    );
   });
 }

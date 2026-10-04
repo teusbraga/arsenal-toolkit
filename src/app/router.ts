@@ -60,7 +60,7 @@ export function initRouter(appContainer: HTMLElement): void {
     appContainer.innerHTML = '';
     window.scrollTo(0, 0);
 
-    if (hash === '#/' || hash === '') {
+    if (hash === '#/' || hash === '' || hash === '#/categoria/pdf') {
       renderDashboard(appContainer);
     } else if (hash === '#/calculadora-impostos') {
       renderTaxCalculator(appContainer);
