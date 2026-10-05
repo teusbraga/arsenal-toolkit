@@ -337,7 +337,7 @@ export function renderPdfCategoryHub(container: HTMLElement, isHome: boolean = f
         </div>
 
         <h1 class="pdf-hub-title">
-          Suíte de Ferramentas PDF
+          Seu PDF rápido, leve, privado e ilimitado
         </h1>
         <p class="pdf-hub-subtitle">
           Edite, converta, combine, proteja e organize seus documentos com processamento 100% no seu navegador. Rápido, sem limites e seguro.
