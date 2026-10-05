@@ -36,6 +36,20 @@ function parseCssColor(color: string): [number, number, number] {
   return [0, 0, 0];
 }
 
+
+/**
+ * Normaliza font-family: remove aspas, pega a primeira família, lowercase.
+ * Ex: '"Calibri", sans-serif' → 'calibri'
+ *     "'Times New Roman', serif" → 'times new roman'
+ */
+function normalizeFontFamily(fontFamily: string): string {
+  if (!fontFamily) return '';
+  // Pega apenas a primeira família (antes da vírgula)
+  const first = fontFamily.split(',')[0];
+  // Remove aspas simples e duplas
+  return first.replace(/['"]/g, '').trim().toLowerCase();
+}
+
 /** Converte px do DOM para pontos PDF (96 DPI → 72 DPI) */
 const PX_TO_PT = 72 / 96;
 
@@ -46,6 +60,13 @@ export class WordToPdfService {
    * 2. Varre TODOS os elementos com getBoundingClientRect() → coordenadas absolutas
    * 3. Mapeia cada elemento (texto, imagem, tabela-célula, fundo)
    * 4. Reproduz cada elemento no PDF nas coordenadas EXATAS de pixel → ponto
+   *
+   * Precisão de estilos:
+   * - Tamanho: getComputedStyle().fontSize sempre em px → conversão exata para pt
+   * - Negrito: getComputedStyle().fontWeight → '700' ou '400' (numérico)
+   * - Itálico: getComputedStyle().fontStyle → 'italic' / 'normal'
+   * - Cor: getComputedStyle().color → sempre 'rgb(r, g, b)'
+   * - Fonte: normalizada e mapeada para família mais próxima disponível em PDF
    */
   static async convertDocxToPdf(
     arrayBuffer: ArrayBuffer,
@@ -55,17 +76,24 @@ export class WordToPdfService {
     // ─── PASSO 1: Renderiza DOCX no DOM oculto ─────────────────────────────
     const safeBuffer = arrayBuffer.slice(0);
 
-    // Container oculto fora do viewport (posição absoluta para não deslocar layout)
+    // Cria elemento <style> separado no <head> para que o CSS do docx-preview
+    // seja processado com prioridade máxima de cascata (CSS em <head> > CSS em <div>)
+    const styleEl = document.createElement('style');
+    document.head.appendChild(styleEl);
+
+    // Container oculto fora do viewport com posição ABSOLUTA para que o browser
+    // calcule o layout completo (getBoundingClientRect funciona em elementos fixos)
     const container = document.createElement('div');
     container.style.cssText = `
       position: fixed;
       top: -99999px;
-      left: -99999px;
+      left: 0px;
       width: 794px;
+      min-height: 1px;
       background: white;
-      visibility: hidden;
+      overflow: visible;
       pointer-events: none;
-      z-index: -1;
+      z-index: -9999;
     `;
     document.body.appendChild(container);
 
@@ -75,7 +103,9 @@ export class WordToPdfService {
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
 
-      await docxPreview.renderAsync(docxBlob, container, undefined, {
+      // Passa styleEl como styleContainer separado para que o CSS vá para o <head>
+      // e se aplique com cascata global corretamente
+      await docxPreview.renderAsync(docxBlob, container, styleEl, {
         className: 'docx',
         inWrapper: true,
         ignoreWidth: false,
@@ -91,7 +121,7 @@ export class WordToPdfService {
       });
 
       // Aguarda renderização completa (imagens, fontes, layout)
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 600));
 
       // ─── PASSO 2: Detecta páginas — tenta múltiplos seletores ─────────────
       // docx-preview gera: <section class="docx"> por página dentro de .docx-wrapper
@@ -114,7 +144,6 @@ export class WordToPdfService {
       }
 
       if (pageEls.length === 0) {
-        // Debug: mostra o HTML gerado para diagnóstico
         console.error('[WordToPdf] HTML gerado pelo docx-preview:', container.innerHTML.substring(0, 500));
         throw new Error('docx-preview não gerou nenhuma página.');
       }
@@ -122,32 +151,59 @@ export class WordToPdfService {
       // ─── PASSO 3: Inicializa PDF ──────────────────────────────────────────
       const pdfDoc = await PDFDocument.create();
 
-      // Fontes vetoriais padrão
+      // Fontes vetoriais embutidas (as únicas disponíveis sem embed externo)
       const fonts = {
-        regular:    await pdfDoc.embedFont(StandardFonts.Helvetica),
-        bold:       await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-        italic:     await pdfDoc.embedFont(StandardFonts.HelveticaOblique),
-        boldItalic: await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique),
-        times:      await pdfDoc.embedFont(StandardFonts.TimesRoman),
-        timesBold:  await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
-        timesItalic:      await pdfDoc.embedFont(StandardFonts.TimesRomanItalic),
-        timesBoldItalic:  await pdfDoc.embedFont(StandardFonts.TimesRomanBoldItalic),
-        courier:    await pdfDoc.embedFont(StandardFonts.Courier),
-        courierBold: await pdfDoc.embedFont(StandardFonts.CourierBold),
+        regular:        await pdfDoc.embedFont(StandardFonts.Helvetica),
+        bold:           await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+        italic:         await pdfDoc.embedFont(StandardFonts.HelveticaOblique),
+        boldItalic:     await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique),
+        times:          await pdfDoc.embedFont(StandardFonts.TimesRoman),
+        timesBold:      await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+        timesItalic:    await pdfDoc.embedFont(StandardFonts.TimesRomanItalic),
+        timesBoldItalic: await pdfDoc.embedFont(StandardFonts.TimesRomanBoldItalic),
+        courier:        await pdfDoc.embedFont(StandardFonts.Courier),
+        courierBold:    await pdfDoc.embedFont(StandardFonts.CourierBold),
+        courierItalic:  await pdfDoc.embedFont(StandardFonts.CourierOblique),
+        courierBoldItalic: await pdfDoc.embedFont(StandardFonts.CourierBoldOblique),
       };
 
+      /**
+       * Mapeia font-family normalizada para a fonte PDF mais próxima.
+       * Lógica: mono → Courier | serif → Times | cursive/script → TimesItalic | default → Helvetica
+       */
       const getFont = (fontFamily: string, bold: boolean, italic: boolean) => {
-        const fn = fontFamily.toLowerCase();
-        if (fn.includes('courier') || fn.includes('mono') || fn.includes('consolas')) {
-          return bold ? fonts.courierBold : fonts.courier;
+        const fn = normalizeFontFamily(fontFamily);
+
+        // Monoespaçadas
+        if (fn.includes('courier') || fn.includes('mono') || fn.includes('consolas') ||
+            fn.includes('lucida console') || fn.includes('menlo') || fn.includes('inconsolata') ||
+            fn.includes('fira') || fn.includes('source code')) {
+          if (bold && italic) return fonts.courierBoldItalic;
+          if (bold) return fonts.courierBold;
+          if (italic) return fonts.courierItalic;
+          return fonts.courier;
         }
+
+        // Serifadas: Times New Roman, Georgia, Garamond, Palatino, Cambria, Baskerville, etc.
         if (fn.includes('times') || fn.includes('roman') || fn.includes('georgia') ||
-            fn.includes('garamond') || fn.includes('palatino') || fn.includes('antiqua')) {
+            fn.includes('garamond') || fn.includes('palatino') || fn.includes('antiqua') ||
+            fn.includes('cambria') || fn.includes('baskerville') || fn.includes('didot') ||
+            fn.includes('bodoni') || fn.includes('constantia') || fn.includes('book antiqua')) {
           if (bold && italic) return fonts.timesBoldItalic;
           if (bold) return fonts.timesBold;
           if (italic) return fonts.timesItalic;
           return fonts.times;
         }
+
+        // Cursivas / Caligráficas / Manuscritas → TimesItalic (o mais próximo disponível)
+        if (fn.includes('script') || fn.includes('forte') || fn.includes('calisto') ||
+            fn.includes('hand') || fn.includes('brush') || fn.includes('cursive') ||
+            fn.includes('edwardian') || fn.includes('freestyle') || fn.includes('kristen') ||
+            fn.includes('comic') || fn.includes('papyrus') || fn.includes('segoe script')) {
+          return bold ? fonts.timesBoldItalic : fonts.timesItalic;
+        }
+
+        // Sans-Serif padrão: Arial, Calibri, Aptos, Helvetica, Segoe UI, Tahoma, Verdana, etc.
         if (bold && italic) return fonts.boldItalic;
         if (bold) return fonts.bold;
         if (italic) return fonts.italic;
@@ -171,11 +227,7 @@ export class WordToPdfService {
         const pdfPage = pdfDoc.addPage([pagePt.w, pagePt.h]);
 
         // Fundo branco
-        pdfPage.drawRectangle({
-          x: 0, y: 0,
-          width: pagePt.w, height: pagePt.h,
-          color: rgb(1, 1, 1)
-        });
+        pdfPage.drawRectangle({ x: 0, y: 0, width: pagePt.w, height: pagePt.h, color: rgb(1, 1, 1) });
 
         /**
          * Converte coordenada Y do DOM (px, origem no topo da página)
@@ -185,23 +237,18 @@ export class WordToPdfService {
           pagePt.h - (domYFromPageTop + elementHeightPx) * PX_TO_PT;
 
         // ── PASSO 5: Mapeamento cartesiano de TODOS os elementos ────────────
-        // Coletamos e ordenamos por z-order (fundos antes, textos depois)
-
         interface MappedElement {
           type: 'rect' | 'text' | 'image';
           x: number; y: number; w: number; h: number; // em pontos
-          // rect
           fillColor?: [number, number, number];
           borderColor?: [number, number, number];
           borderWidth?: number;
-          // text
           text?: string;
           fontSize?: number;
           fontFamily?: string;
           bold?: boolean;
           italic?: boolean;
           textColor?: [number, number, number];
-          // image
           imgData?: Uint8Array;
           imgExt?: string;
         }
@@ -213,26 +260,26 @@ export class WordToPdfService {
           if (!el || !el.getBoundingClientRect) return;
 
           const rect = el.getBoundingClientRect();
-          // Posição relativa ao topo-esquerdo da página
           const relX = rect.left - pageRect.left;
           const relY = rect.top  - pageRect.top;
           const elW  = rect.width;
           const elH  = rect.height;
 
           // Ignora elementos completamente fora da página
-          if (relX + elW < 0 || relY + elH < 0 || relX > pagePx.w || relY > pagePx.h) return;
+          if (relX + elW < -5 || relY + elH < -5 || relX > pagePx.w + 5 || relY > pagePx.h + 5) return;
 
-          const style = window.getComputedStyle(el);
+          // getComputedStyle resolve TODA a cascata CSS:
+          // classes docx-preview + inline styles + herança — resultado final garantido
+          const cs = window.getComputedStyle(el);
           const tag = el.tagName?.toLowerCase() || '';
 
           // ── IMAGENS ──────────────────────────────────────────────────────
           if (tag === 'img') {
             const src = (el as HTMLImageElement).src;
             if (src && elW > 2 && elH > 2) {
-              // Converte via canvas para obter bytes
               try {
                 const canvas = document.createElement('canvas');
-                canvas.width  = Math.round(elW * 2);  // 2x para qualidade
+                canvas.width  = Math.round(elW * 2); // 2x resolução
                 canvas.height = Math.round(elH * 2);
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
@@ -242,50 +289,42 @@ export class WordToPdfService {
                   const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
                   elements.push({
                     type: 'image',
-                    x: relX * PX_TO_PT,
-                    y: toPdfY(relY, elH),
-                    w: elW * PX_TO_PT,
-                    h: elH * PX_TO_PT,
-                    imgData: bytes,
-                    imgExt: 'jpg',
+                    x: relX * PX_TO_PT, y: toPdfY(relY, elH),
+                    w: elW * PX_TO_PT,  h: elH * PX_TO_PT,
+                    imgData: bytes, imgExt: 'jpg',
                   });
                 }
               } catch (e) {
                 console.warn('[WordToPdf] Erro ao capturar imagem:', e);
               }
             }
-            return; // não desce filhos de <img>
+            return;
           }
 
           // ── FUNDOS / BORDAS (células de tabela, divs coloridos) ──────────
-          const bgColor = style.backgroundColor;
+          const bgColor = cs.backgroundColor;
           const hasBackground = bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent';
-          const borderTop = parseFloat(style.borderTopWidth) || 0;
-          const hasBorder = borderTop > 0 || parseFloat(style.borderLeftWidth) > 0;
+          const borderTopW = parseFloat(cs.borderTopWidth) || 0;
+          const borderLeftW = parseFloat(cs.borderLeftWidth) || 0;
+          const hasBorder = borderTopW > 0.1 || borderLeftW > 0.1;
 
           if ((hasBackground || hasBorder) && elW > 1 && elH > 1) {
-            const xPt = relX * PX_TO_PT;
-            const yPt = toPdfY(relY, elH);
-            const wPt = elW * PX_TO_PT;
-            const hPt = elH * PX_TO_PT;
-
             const mapped: MappedElement = {
               type: 'rect',
-              x: xPt, y: yPt, w: wPt, h: hPt
+              x: relX * PX_TO_PT, y: toPdfY(relY, elH),
+              w: elW * PX_TO_PT,  h: elH * PX_TO_PT,
             };
 
             if (hasBackground) {
               const [r, g, b] = parseCssColor(bgColor);
-              // Ignora branco puro (economiza operações)
               if (!(r > 0.98 && g > 0.98 && b > 0.98)) {
                 mapped.fillColor = [r, g, b];
               }
             }
 
             if (hasBorder) {
-              const bc = style.borderTopColor || 'rgb(0,0,0)';
-              mapped.borderColor = parseCssColor(bc);
-              mapped.borderWidth = borderTop * PX_TO_PT;
+              mapped.borderColor = parseCssColor(cs.borderTopColor || 'rgb(0,0,0)');
+              mapped.borderWidth = borderTopW * PX_TO_PT;
             }
 
             if (mapped.fillColor || mapped.borderColor) {
@@ -294,20 +333,38 @@ export class WordToPdfService {
           }
 
           // ── TEXTO ─────────────────────────────────────────────────────────
-          // Só lemos text nodes diretos (não containers)
+          // Percorremos apenas text nodes filhos diretos deste elemento
           for (const child of Array.from(el.childNodes)) {
             if (child.nodeType !== Node.TEXT_NODE) continue;
             const text = cleanWinAnsi(child.textContent || '');
             if (!text.trim()) continue;
 
-            // Usa a posição do elemento pai como posição do texto
-            const fontSize = parseFloat(style.fontSize) || 11;
-            const fontFamily = style.fontFamily || 'Helvetica';
-            const fontWeight = style.fontWeight;
-            const fontStyle = style.fontStyle;
-            const isBold = parseInt(fontWeight) >= 600 || fontWeight === 'bold';
-            const isItalic = fontStyle === 'italic' || fontStyle === 'oblique';
-            const colorStr = style.color || 'rgb(0,0,0)';
+            // ── TAMANHO ──────────────────────────────────────────────────────
+            // getComputedStyle().fontSize retorna SEMPRE em 'px' (ex: "14.67px")
+            // Isso é a conversão que o browser faz de 11pt → 14.67px a 96dpi
+            // Nós revertemos: 14.67px * (72/96) = 11pt  → PERFEITO
+            const fontSizePx = parseFloat(cs.fontSize) || 12;
+            const fontSizePt = Math.max(6, fontSizePx * PX_TO_PT);
+
+            // ── NEGRITO ───────────────────────────────────────────────────────
+            // getComputedStyle().fontWeight sempre retorna um número (ex: "700" ou "400")
+            // 100–599 = normal, 600–900 = bold (700 = bold padrão)
+            const fontWeightNum = parseInt(cs.fontWeight, 10) || 400;
+            const isBold = fontWeightNum >= 600;
+
+            // ── ITÁLICO ───────────────────────────────────────────────────────
+            // getComputedStyle().fontStyle retorna 'italic', 'oblique' ou 'normal'
+            const isItalic = cs.fontStyle === 'italic' || cs.fontStyle === 'oblique';
+
+            // ── COR ───────────────────────────────────────────────────────────
+            // getComputedStyle().color retorna SEMPRE 'rgb(r, g, b)' ou 'rgba(r, g, b, a)'
+            // Nunca retorna 'transparent' para texto (padrão: rgb(0, 0, 0) = preto)
+            const colorStr = cs.color || 'rgb(0, 0, 0)';
+
+            // ── FONTE ─────────────────────────────────────────────────────────
+            // getComputedStyle().fontFamily retorna ex: '"Calibri", sans-serif'
+            // normalizeFontFamily() extrai e limpa o primeiro nome
+            const fontFamily = cs.fontFamily || 'Helvetica';
 
             elements.push({
               type: 'text',
@@ -316,7 +373,7 @@ export class WordToPdfService {
               w: elW * PX_TO_PT,
               h: elH * PX_TO_PT,
               text,
-              fontSize: Math.max(6, fontSize * PX_TO_PT),
+              fontSize: fontSizePt,
               fontFamily,
               bold: isBold,
               italic: isItalic,
@@ -340,7 +397,7 @@ export class WordToPdfService {
         const images = elements.filter((e) => e.type === 'image');
         const texts  = elements.filter((e) => e.type === 'text');
 
-        // Fundos e bordas primeiro
+        // 1. Fundos e bordas (base)
         for (const el of rects) {
           try {
             pdfPage.drawRectangle({
@@ -352,36 +409,33 @@ export class WordToPdfService {
           } catch (_) {}
         }
 
-        // Imagens depois dos fundos
+        // 2. Imagens
         for (const el of images) {
           if (!el.imgData) continue;
           try {
             const embedded = await pdfDoc.embedJpg(el.imgData);
-            pdfPage.drawImage(embedded, {
-              x: el.x, y: el.y, width: el.w, height: el.h
-            });
+            pdfPage.drawImage(embedded, { x: el.x, y: el.y, width: el.w, height: el.h });
           } catch (e) {
             console.warn('[WordToPdf] Embed imagem falhou:', e);
           }
         }
 
-        // Textos por último (ficam sobre tudo)
+        // 3. Textos (topo)
         for (const el of texts) {
           if (!el.text?.trim()) continue;
           try {
             const font = getFont(el.fontFamily || '', el.bold || false, el.italic || false);
             const [r, g, b] = el.textColor || [0, 0, 0];
+            const sz = el.fontSize || 11;
 
-            // Ajusta tamanho se o texto transbordar a caixa
-            let sz = el.fontSize || 11;
-            const textW = font.widthOfTextAtSize(el.text, sz);
-            if (el.w > 0 && textW > el.w * 1.15) {
-              sz = Math.max(6, sz * (el.w / textW));
-            }
+            // Baseline offset: em PDF o Y é a baseline da fonte, não o topo do elemento
+            // A altura da caixa em px convertida para pt dá a referência do topo
+            // Descemos um pouco do topo (ascent ≈ 80% da altura da linha)
+            const yBaseline = el.y + el.h * 0.15;
 
             pdfPage.drawText(el.text, {
               x: el.x,
-              y: el.y + 1, // pequeno offset para baseline
+              y: yBaseline,
               size: sz,
               font,
               color: rgb(r, g, b),
@@ -400,10 +454,9 @@ export class WordToPdfService {
       };
 
     } finally {
-      // Limpa o container oculto sempre
-      if (container.parentNode) {
-        document.body.removeChild(container);
-      }
+      // Limpa sempre: container do body + style do head
+      if (container.parentNode) document.body.removeChild(container);
+      if (styleEl.parentNode) document.head.removeChild(styleEl);
     }
   }
 }
