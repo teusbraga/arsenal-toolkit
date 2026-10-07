@@ -343,6 +343,15 @@ export const TOOLS_LIST: ToolItem[] = [
     featured: true,
   },
   {
+    id: 'text-to-pdf',
+    name: 'Compilador de Texto para PDF',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Cole artigos, tabelas e notas da web (Ctrl+C -> Ctrl+V) mantendo a formatação e exporte para PDF instantaneamente.',
+    path: '#/pdf/texto-para-pdf',
+    featured: true,
+  },
+  {
     id: 'excel-to-pdf',
     name: 'Excel para PDF (.XLSX)',
     category: 'pdf',

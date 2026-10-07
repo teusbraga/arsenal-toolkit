@@ -194,9 +194,9 @@ const PDF_THEMES: PdfThemeSection[] = [
   {
     id: 'tema-converter-para',
     title: 'Converter para PDF (Criar)',
-    subtitle: 'Gere documentos PDF padronizados a partir de arquivos Word, planilhas Excel e fotos.',
+    subtitle: 'Gere documentos PDF padronizados a partir de colagem web formatada, arquivos Word, planilhas e fotos.',
     colorClass: 'theme-green',
-    badge: '3 Ferramentas',
+    badge: '4 Ferramentas',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
       <polyline points="14 2 14 8 20 8"/>
@@ -204,6 +204,19 @@ const PDF_THEMES: PdfThemeSection[] = [
       <path d="m9 14 3-3 3 3"/>
     </svg>`,
     features: [
+      {
+        id: 'text-to-pdf',
+        name: 'Compilador de Texto para PDF',
+        desc: 'Cole artigos, tabelas e notas da web (Ctrl+C -> Ctrl+V) preservando a formatação e exporte para PDF.',
+        path: '#/pdf/texto-para-pdf',
+        tag: 'Ctrl+V -> PDF',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <line x1="9" y1="16" x2="13" y2="16"/>
+        </svg>`
+      },
       {
         id: 'word-to-pdf',
         name: 'Word para PDF (.DOCX)',
