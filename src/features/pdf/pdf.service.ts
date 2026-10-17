@@ -360,44 +360,77 @@ export class PdfService {
     
     const newPdf = await PDFDocument.create();
 
-    for (let i = 1; i <= numPages; i++) {
-      const page = await originalPdf.getPage(i);
-      const viewport = page.getViewport({ scale: resolutionScale }); 
-      
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+    // Reusable single canvas to prevent mobile GPU canvas context exhaustion and memory leaks
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d', { willReadFrequently: false });
+    if (!context) {
+      throw new Error('Não foi possível inicializar o contexto gráfico do navegador.');
+    }
 
-      if (context) {
-        // Draw white background
+    try {
+      for (let i = 1; i <= numPages; i++) {
+        const page = await originalPdf.getPage(i);
+        const originalViewport = page.getViewport({ scale: 1.0 });
+
+        // Calculate bounded scale to avoid exceeding mobile canvas/texture limits (max ~1800px on largest side)
+        const maxDimension = 1800;
+        const maxPageDim = Math.max(originalViewport.width, originalViewport.height);
+        let effectiveScale = resolutionScale;
+        if (maxPageDim * effectiveScale > maxDimension) {
+          effectiveScale = maxDimension / maxPageDim;
+        }
+
+        const viewport = page.getViewport({ scale: effectiveScale }); 
+        
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+
+        // Draw solid white background for JPEG rendering
         context.fillStyle = '#ffffff';
         context.fillRect(0, 0, canvas.width, canvas.height);
         
         const renderContext: any = { canvasContext: context, viewport: viewport };
         await page.render(renderContext).promise;
         
-        // Export to JPEG with specified quality
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        const base64Data = dataUrl.split(',')[1];
-        const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-        
+        // Export to JPEG Blob directly (avoids toDataURL, Base64 explosion and atob loops)
+        const blob: Blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(
+            (b) => {
+              if (b) resolve(b);
+              else reject(new Error('Falha ao converter página em imagem comprimida.'));
+            },
+            'image/jpeg',
+            quality
+          );
+        });
+
+        const imageBytes = new Uint8Array(await blob.arrayBuffer());
         const jpgImage = await newPdf.embedJpg(imageBytes);
         
-        // Use original viewport dimensions for the page so it matches original size
-        const originalViewport = page.getViewport({ scale: 1.0 });
+        // Use original viewport dimensions so the PDF page size matches the original
         const newPage = newPdf.addPage([originalViewport.width, originalViewport.height]);
-        
         newPage.drawImage(jpgImage, {
           x: 0,
           y: 0,
           width: originalViewport.width,
           height: originalViewport.height,
         });
+
+        // Release PDF.js page resources from worker & memory
+        page.cleanup();
+
+        if (onProgress) onProgress(i, numPages);
+
+        // Small breathing delay to yield thread for GC and smooth UI progress on mobile devices
+        await new Promise(r => setTimeout(r, 20));
       }
-      
-      if (onProgress) onProgress(i, numPages);
-      await new Promise(r => setTimeout(r, 0));
+    } finally {
+      // Free canvas GPU surface memory immediately
+      canvas.width = 0;
+      canvas.height = 0;
+      try {
+        await loadingTask.destroy();
+      } catch (_) {}
     }
 
     return await newPdf.save();

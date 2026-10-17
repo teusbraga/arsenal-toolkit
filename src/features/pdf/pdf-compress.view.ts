@@ -13,6 +13,8 @@ function formatBytes(bytes: number, decimals = 2) {
 export function renderPdfCompress(container: HTMLElement) {
   let isProcessing = false;
   let selectedFile: File | null = null;
+  let lastCompressedBlob: Blob | null = null;
+  let lastDownloadFilename = '';
   // Presets: quality and scale
   let compressPreset: 'max' | 'balanced' | 'high' = 'balanced';
 
@@ -34,7 +36,7 @@ export function renderPdfCompress(container: HTMLElement) {
         <svg class="dropzone-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         <div class="dropzone-text">Arraste seu PDF para cá</div>
         <div class="dropzone-hint">Ou clique para selecionar um arquivo</div>
-        <input type="file" id="pdf-comp-file-input" accept="application/pdf" style="display: none;" />
+        <input type="file" id="pdf-comp-file-input" accept="application/pdf,.pdf" style="display: none;" />
       </div>
     </div>
 
@@ -83,7 +85,11 @@ export function renderPdfCompress(container: HTMLElement) {
       
       <div id="pdf-comp-success" style="display: none; background-color: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: center;">
         <div style="color: #22c55e; font-weight: bold; margin-bottom: 8px;">Concluído com Sucesso! 🎉</div>
-        <div id="pdf-comp-success-stats" style="color: var(--text-secondary); font-size: 0.9rem;">Reduzido de X para Y</div>
+        <div id="pdf-comp-success-stats" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">Reduzido de X para Y</div>
+        <button class="btn-primary" id="btn-pdf-comp-download" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Baixar PDF Comprimido
+        </button>
       </div>
 
       <button class="btn-primary" id="btn-pdf-comp-execute">
@@ -111,9 +117,25 @@ export function renderPdfCompress(container: HTMLElement) {
   const progressCount = container.querySelector('#pdf-comp-progress-count') as HTMLSpanElement;
   const successContainer = container.querySelector('#pdf-comp-success') as HTMLDivElement;
   const successStats = container.querySelector('#pdf-comp-success-stats') as HTMLDivElement;
+  const btnDownload = container.querySelector('#btn-pdf-comp-download') as HTMLButtonElement;
   
   const btnExecute = container.querySelector('#btn-pdf-comp-execute') as HTMLButtonElement;
   const btnReset = container.querySelector('#btn-reset-pdf-comp') as HTMLButtonElement;
+
+  function downloadFile() {
+    if (!lastCompressedBlob || !selectedFile) return;
+    const url = URL.createObjectURL(lastCompressedBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = lastDownloadFilename || `${selectedFile.name.replace(/\.[^/.]+$/, "")}_comprimido.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Keep URL valid for 60 seconds so mobile browser download managers don't get canceled prematurely
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+
+  btnDownload.addEventListener('click', downloadFile);
 
   btnBack.addEventListener('click', () => { window.location.hash = ''; });
   
@@ -121,6 +143,8 @@ export function renderPdfCompress(container: HTMLElement) {
     setupArea.style.display = 'block';
     workspaceArea.style.display = 'none';
     selectedFile = null;
+    lastCompressedBlob = null;
+    lastDownloadFilename = '';
     fileInput.value = '';
     progressContainer.style.display = 'none';
     successContainer.style.display = 'none';
@@ -153,7 +177,8 @@ export function renderPdfCompress(container: HTMLElement) {
   });
 
   function handleFile(file: File) {
-    if (file.type !== 'application/pdf') {
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
       alert('Por favor, selecione um arquivo PDF válido.');
       return;
     }
@@ -194,9 +219,12 @@ export function renderPdfCompress(container: HTMLElement) {
         progressCount.innerText = `${Math.round((rendered / total) * 100)}%`;
       });
       
-      const blob = new Blob([newPdfBytes.buffer as any], { type: 'application/pdf' });
+      const blob = new Blob([newPdfBytes as any], { type: 'application/pdf' });
       const newSize = blob.size;
       const oldSize = selectedFile.size;
+      
+      lastCompressedBlob = blob;
+      lastDownloadFilename = `${selectedFile.name.replace(/\.[^/.]+$/, "")}_comprimido.pdf`;
       
       // Update UI with success stats
       successContainer.style.display = 'block';
@@ -208,16 +236,9 @@ export function renderPdfCompress(container: HTMLElement) {
         successStats.innerHTML = `Arquivo processado. Novo tamanho: ${formatBytes(newSize)} (O original já estava otimizado).`;
       }
       
-      btnExecute.style.display = 'none'; // hide it, force them to use "Trocar de Arquivo" or re-download
+      btnExecute.style.display = 'none';
       
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedFile.name.replace(/\.[^/.]+$/, "")}_comprimido.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      downloadFile();
       
       historyManager.record(
         'pdf-compress',
@@ -228,9 +249,9 @@ export function renderPdfCompress(container: HTMLElement) {
         {}
       );
       
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao comprimir o PDF.');
+    } catch (err: any) {
+      console.error('Erro na compressão:', err);
+      alert(`Erro ao comprimir o PDF: ${err?.message || 'Falha no processamento'}`);
     } finally {
       isProcessing = false;
       btnExecute.disabled = false;
