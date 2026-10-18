@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import pdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url';
 import { WordToPdfService } from './word-to-pdf.service';
 import { historyManager } from '../../core/history/history.manager';
 

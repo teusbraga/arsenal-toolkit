@@ -53,6 +53,11 @@ export default defineConfig({
       }
     })
   ],
+  resolve: {
+    alias: [
+      { find: /^pdfjs-dist$/, replacement: 'pdfjs-dist/legacy/build/pdf.mjs' }
+    ]
+  },
   build: {
     chunkSizeWarningLimit: 1200,
     rollupOptions: {

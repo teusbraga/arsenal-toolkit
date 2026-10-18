@@ -1,3 +1,4 @@
+import './polyfills';
 import './styles/reset.css';
 import './styles/variables.css';
 import './styles/layout.css';

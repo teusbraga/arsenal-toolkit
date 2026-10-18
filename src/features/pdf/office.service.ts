@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import pdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { 
   Document,

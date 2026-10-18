@@ -1,6 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist';
 // Vite syntax for loading worker as a URL
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import pdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url';
 import { PDFDocument, degrees, StandardFonts, rgb } from 'pdf-lib';
 import JSZip from 'jszip';
 import { encryptPDF, EncryptPDFOptions } from '@pdfsmaller/pdf-encrypt';
