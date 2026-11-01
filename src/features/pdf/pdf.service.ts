@@ -441,11 +441,36 @@ export class PdfService {
    * Coordinates must be in PDF points (0,0 at bottom-left).
    */
   static async applyEdits(buffer: ArrayBuffer, pagesEdits: Record<number, PdfEditItem[]>): Promise<Uint8Array> {
-    const pdf = await PDFDocument.load(buffer);
+    const pdf = await PDFDocument.load(buffer.slice(0));
     const font = await pdf.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const fontTimes = await pdf.embedFont(StandardFonts.TimesRoman);
+    const fontTimesBold = await pdf.embedFont(StandardFonts.TimesRomanBold);
+    const fontCourier = await pdf.embedFont(StandardFonts.Courier);
+    const fontCourierBold = await pdf.embedFont(StandardFonts.CourierBold);
     
     const pages = pdf.getPages();
+
+    const parseColor = (c?: string, isText = false) => {
+      if (!c) return isText ? rgb(0, 0, 0) : rgb(1, 1, 1);
+      if (c === 'white') return rgb(1, 1, 1);
+      if (c === 'black') return rgb(0, 0, 0);
+      if (c.startsWith('#')) {
+        let hex = c.slice(1);
+        if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+        if (hex.length === 6) {
+          const num = parseInt(hex, 16);
+          return rgb(((num >> 16) & 255) / 255, ((num >> 8) & 255) / 255, (num & 255) / 255);
+        }
+      }
+      if (c.startsWith('rgb')) {
+        const m = c.match(/\d+/g);
+        if (m && m.length >= 3) {
+          return rgb(Number(m[0]) / 255, Number(m[1]) / 255, Number(m[2]) / 255);
+        }
+      }
+      return isText ? rgb(0, 0, 0) : rgb(1, 1, 1);
+    };
 
     for (const [pageIndexStr, items] of Object.entries(pagesEdits)) {
       const pageIndex = parseInt(pageIndexStr, 10);
@@ -460,10 +485,18 @@ export class PdfService {
             y: item.y,
             width: item.width,
             height: item.height,
-            color: item.color === 'black' ? rgb(0, 0, 0) : rgb(1, 1, 1),
+            color: parseColor(item.color, false),
           });
         } else if (item.type === 'text') {
-          const selectedFont = item.weight === 'bold' ? fontBold : font;
+          let selectedFont = item.weight === 'bold' ? fontBold : font;
+          if (item.font) {
+            const fn = item.font.toLowerCase();
+            if (fn.includes('times') || fn.includes('serif')) {
+              selectedFont = item.weight === 'bold' ? fontTimesBold : fontTimes;
+            } else if (fn.includes('courier') || fn.includes('mono')) {
+              selectedFont = item.weight === 'bold' ? fontCourierBold : fontCourier;
+            }
+          }
           let safeText = item.text || '';
           try {
             selectedFont.encodeText(safeText);
@@ -485,7 +518,7 @@ export class PdfService {
             y: item.y,
             size: item.size || 12,
             font: selectedFont,
-            color: item.color === 'white' ? rgb(1,1,1) : rgb(0,0,0),
+            color: parseColor(item.color, true),
           });
         } else if (item.type === 'image') {
           try {
@@ -941,8 +974,8 @@ export class PdfService {
 }
 
 export type PdfEditItem = 
-  | { type: 'rect', x: number, y: number, width: number, height: number, color: 'white' | 'black' }
-  | { type: 'text', text: string, x: number, y: number, size: number, color: 'black' | 'white', weight: 'normal' | 'bold' }
+  | { type: 'rect', x: number, y: number, width: number, height: number, color: string }
+  | { type: 'text', text: string, x: number, y: number, size: number, color: string, weight?: 'normal' | 'bold', font?: string }
   | { type: 'image', dataUrl: string, x: number, y: number, width: number, height: number };
 
 export interface PdfEditOptions {
