@@ -207,9 +207,9 @@ const PDF_THEMES: PdfThemeSection[] = [
   {
     id: 'tema-converter-para',
     title: 'Converter para PDF (Criar)',
-    subtitle: 'Gere documentos PDF padronizados a partir de colagem web formatada, arquivos Word, planilhas e fotos.',
+    subtitle: 'Gere documentos PDF padronizados a partir de projetos AutoCAD (DWG/DXF), texto web, Word, planilhas e fotos.',
     colorClass: 'theme-green',
-    badge: '4 Ferramentas',
+    badge: '5 Ferramentas',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
       <polyline points="14 2 14 8 20 8"/>
@@ -267,6 +267,18 @@ const PDF_THEMES: PdfThemeSection[] = [
           <circle cx="8" cy="12" r="1.5"/>
           <path d="m17 17-3-3-6 7"/>
           <path d="M7 3h12a2 2 0 0 1 2 2v12"/>
+        </svg>`
+      },
+      {
+        id: 'dwg-to-pdf',
+        name: 'DWG para PDF (.DWG / .DXF)',
+        desc: 'Plote projetos AutoCAD (.DWG e .DXF) em PDF vetorial nítido com seleção de prancha e estilo CTB.',
+        path: '#/pdf/dwg-para-pdf',
+        tag: 'DWG -> PDF',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <path d="M8 16l3-3 2 2 3-3"/>
         </svg>`
       }
     ]

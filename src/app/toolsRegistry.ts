@@ -370,6 +370,15 @@ export const TOOLS_LIST: ToolItem[] = [
     featured: true,
   },
   {
+    id: 'dwg-to-pdf',
+    name: 'DWG para PDF (AutoCAD & DXF)',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Converta desenhos técnicos .DWG e .DXF (AutoCAD) em arquivos PDF vetoriais com escolha de folha e plotagem CTB.',
+    path: '#/pdf/dwg-para-pdf',
+    featured: true,
+  },
+  {
     id: 'pdf-unlock',
     name: 'Desbloquear PDF',
     category: 'pdf',

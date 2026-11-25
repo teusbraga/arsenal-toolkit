@@ -23,6 +23,7 @@ import { renderPdfCompare } from '../features/pdf/pdf-compare.view';
 import { renderPdfToWord } from '../features/pdf/pdf-to-word.view';
 import { renderPdfToPptx } from '../features/pdf/pdf-to-pptx.view';
 import { renderPdfToDwg } from '../features/pdf/pdf-to-dwg.view';
+import { renderDwgToPdf } from '../features/pdf/dwg-to-pdf.view';
 import { renderWordToPdf } from '../features/pdf/word-to-pdf.view';
 import { renderTextToPdf } from '../features/pdf/text-to-pdf.view';
 import { renderExcelToPdf } from '../features/pdf/excel-to-pdf.view';
@@ -110,6 +111,8 @@ export function initRouter(appContainer: HTMLElement): void {
       renderTextToPdf(appContainer);
     } else if (hash === '#/pdf/excel-para-pdf') {
       renderExcelToPdf(appContainer);
+    } else if (hash === '#/pdf/dwg-para-pdf') {
+      renderDwgToPdf(appContainer);
     } else if (hash === '#/pdf/desbloquear') {
       renderPdfUnlock(appContainer);
     } else if (hash === '#/pdf/bloquear') {
