@@ -9,7 +9,7 @@ export default defineConfig({
       manifest: {
         name: 'Arsenal PDF converter',
         short_name: 'Arsenal PDF',
-        description: 'SuÃ­te completa de ferramentas essenciais para produtividade diÃ¡ria.',
+        description: 'Suíte completa e privada para editar, converter (DWG, Word, Excel, PowerPoint, Imagem e Texto), organizar e proteger PDFs 100% no navegador.',
         theme_color: '#111111',
         background_color: '#F5F5F5',
         display: 'standalone',
@@ -65,6 +65,7 @@ export default defineConfig({
         manualChunks: {
           'vendor-pdf': ['pdf-lib', 'pdfjs-dist'],
           'vendor-office': ['docx', 'xlsx', 'jszip'],
+          'vendor-cad': ['nasjidwg'],
         }
       }
     }

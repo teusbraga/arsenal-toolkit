@@ -22,6 +22,7 @@ import { renderPdfLock } from '../features/pdf/pdf-lock.view';
 import { renderPdfCompare } from '../features/pdf/pdf-compare.view';
 import { renderPdfToWord } from '../features/pdf/pdf-to-word.view';
 import { renderPdfToPptx } from '../features/pdf/pdf-to-pptx.view';
+import { renderPdfToDwg } from '../features/pdf/pdf-to-dwg.view';
 import { renderWordToPdf } from '../features/pdf/word-to-pdf.view';
 import { renderTextToPdf } from '../features/pdf/text-to-pdf.view';
 import { renderExcelToPdf } from '../features/pdf/excel-to-pdf.view';
@@ -101,6 +102,8 @@ export function initRouter(appContainer: HTMLElement): void {
       renderPdfToExcel(appContainer);
     } else if (hash === '#/pdf/para-pptx') {
       renderPdfToPptx(appContainer);
+    } else if (hash === '#/pdf/para-dwg') {
+      renderPdfToDwg(appContainer);
     } else if (hash === '#/pdf/word-para-pdf') {
       renderWordToPdf(appContainer);
     } else if (hash === '#/pdf/texto-para-pdf') {

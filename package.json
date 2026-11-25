@@ -15,6 +15,7 @@
     "docx-preview": "^0.4.1",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.2",
+    "nasjidwg": "^0.19.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.3.289",
     "pptxgenjs": "^4.0.1",

@@ -115,9 +115,9 @@ const PDF_THEMES: PdfThemeSection[] = [
   {
     id: 'tema-converter-de',
     title: 'Converter de PDF (Exportar)',
-    subtitle: 'Exporte seus documentos PDF para formatos editáveis do Microsoft Office, imagens e texto.',
+    subtitle: 'Exporte seus documentos PDF para AutoCAD (.DWG/.DXF), Microsoft Office, imagens e texto.',
     colorClass: 'theme-orange',
-    badge: '5 Ferramentas',
+    badge: '6 Ferramentas',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
       <polyline points="14 2 14 8 20 8"/>
@@ -162,6 +162,19 @@ const PDF_THEMES: PdfThemeSection[] = [
           <path d="M8 21h8"/>
           <path d="M12 17v4"/>
           <path d="M7 8h3a2 2 0 0 1 0 4H7z"/>
+        </svg>`
+      },
+      {
+        id: 'pdf-to-dwg',
+        name: 'PDF para DWG (.DWG / AutoCAD)',
+        desc: 'Converta plantas e desenhos vetoriais PDF em arquivos .DWG e .DXF com camadas editáveis.',
+        path: '#/pdf/para-dwg',
+        tag: 'CAD / DWG',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <path d="M8 17h8"/>
+          <path d="M9 13l3-3 3 3"/>
         </svg>`
       },
       {
@@ -353,7 +366,7 @@ export function renderPdfCategoryHub(container: HTMLElement, isHome: boolean = f
           Seu PDF rápido, leve, privado e ilimitado
         </h1>
         <p class="pdf-hub-subtitle">
-          Edite, converta, combine, proteja e organize seus documentos com processamento 100% no seu navegador. Rápido, sem limites e seguro.
+          Edite, converta (Word, Excel, PowerPoint, DWG/CAD, Imagem e Markdown), compile textos da web, junte, comprima e proteja seus documentos 100% no navegador.
         </p>
 
         <!-- Barra de Busca Rápida -->
@@ -370,22 +383,22 @@ export function renderPdfCategoryHub(container: HTMLElement, isHome: boolean = f
         <button class="pdf-nav-chip blue" data-target="#tema-organizar">
           <span class="chip-dot"></span>
           <span>Organizar & Editar</span>
-          <span class="chip-count">6</span>
+          <span class="chip-count">${PDF_THEMES[0].features.length}</span>
         </button>
         <button class="pdf-nav-chip orange" data-target="#tema-converter-de">
           <span class="chip-dot"></span>
           <span>PDF para Outros</span>
-          <span class="chip-count">5</span>
+          <span class="chip-count">${PDF_THEMES[1].features.length}</span>
         </button>
         <button class="pdf-nav-chip green" data-target="#tema-converter-para">
           <span class="chip-dot"></span>
           <span>Criar PDF</span>
-          <span class="chip-count">3</span>
+          <span class="chip-count">${PDF_THEMES[2].features.length}</span>
         </button>
         <button class="pdf-nav-chip purple" data-target="#tema-seguranca">
           <span class="chip-dot"></span>
           <span>Segurança & Diff</span>
-          <span class="chip-count">3</span>
+          <span class="chip-count">${PDF_THEMES[3].features.length}</span>
         </button>
       </nav>
 

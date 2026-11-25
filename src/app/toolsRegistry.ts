@@ -334,6 +334,15 @@ export const TOOLS_LIST: ToolItem[] = [
     featured: true,
   },
   {
+    id: 'pdf-to-dwg',
+    name: 'PDF para DWG (AutoCAD)',
+    category: 'pdf',
+    categoryName: 'PDF',
+    description: 'Converta plantas e desenhos vetoriais PDF em arquivos nativos .DWG e .DXF com camadas editáveis para AutoCAD.',
+    path: '#/pdf/para-dwg',
+    featured: true,
+  },
+  {
     id: 'word-to-pdf',
     name: 'Word para PDF (.DOCX)',
     category: 'pdf',
